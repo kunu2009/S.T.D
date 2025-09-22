@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Spin the Bottle - Party Game</title>
+    <link rel="stylesheet" href="score-styles.css">
     <style>
         * {
             margin: 0;
@@ -1250,6 +1251,110 @@
                     .then(() => console.log('SW registered'))
                     .catch(() => console.log('SW registration failed'));
             });
+        }
+    </script>
+    
+    <!-- Scoring System Integration -->
+    <script src="room-manager.js"></script>
+    <script src="score-manager.js"></script>
+    <script src="leaderboard-ui.js"></script>
+    <script>
+        // Integrate scoring with Truth or Dare
+        const originalShowTruth = window.showTruth;
+        const originalShowDare = window.showDare;
+        
+        // Override truth completion
+        window.showTruth = function() {
+            originalShowTruth.call(this);
+            // Add scoring when truth is shown (player gets participation points)
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'participation');
+                }
+            }
+        };
+        
+        // Override dare completion  
+        window.showDare = function() {
+            originalShowDare.call(this);
+            // Add scoring when dare is shown (player gets participation points)
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'participation');
+                }
+            }
+        };
+        
+        // Add scoring buttons to game interface
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof scoreManager !== 'undefined') {
+                // Add quick scoring buttons
+                const gameContainer = document.querySelector('.game-screen');
+                if (gameContainer) {
+                    const scoringPanel = document.createElement('div');
+                    scoringPanel.className = 'scoring-panel';
+                    scoringPanel.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        display: flex;
+                        gap: 10px;
+                        flex-direction: column;
+                        z-index: 1000;
+                    `;
+                    
+                    scoringPanel.innerHTML = `
+                        <button onclick="awardTruthCompleted()" class="scoring-btn truth-btn" 
+                                style="background: #4ade80; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            ✅ Truth Completed
+                        </button>
+                        <button onclick="awardDareCompleted()" class="scoring-btn dare-btn"
+                                style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            💪 Dare Completed
+                        </button>
+                        <button onclick="awardDareSkipped()" class="scoring-btn skip-btn"
+                                style="background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            ⏭️ Dare Skipped
+                        </button>
+                        <button onclick="leaderboardUI.showQuickScore()" class="scoring-btn score-btn"
+                                style="background: #8b5cf6; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            🏆 Quick Score
+                        </button>
+                    `;
+                    
+                    document.body.appendChild(scoringPanel);
+                }
+            }
+        });
+        
+        // Scoring functions
+        function awardTruthCompleted() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'truth_completed');
+                }
+            }
+        }
+        
+        function awardDareCompleted() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'dare_completed');
+                }
+            }
+        }
+        
+        function awardDareSkipped() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'dare_skipped');
+                }
+            }
         }
     </script>
 </body>

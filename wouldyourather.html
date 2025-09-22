@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Would You Rather - Ultimate Party Game</title>
+    <link rel="stylesheet" href="score-styles.css">
     <style>
         * {
             margin: 0;
@@ -1465,6 +1466,111 @@
             players = [];
             currentQuestionIndex = 0;
             questionCount = 0;
+        }
+    </script>
+    
+    <!-- Scoring System Integration -->
+    <script src="room-manager.js"></script>
+    <script src="score-manager.js"></script>
+    <script src="leaderboard-ui.js"></script>
+    <script>
+        // Integrate scoring with Would You Rather
+        const originalChooseOption = window.chooseOption;
+        
+        // Override choice selection to add scoring
+        window.chooseOption = function(option) {
+            if (originalChooseOption) {
+                originalChooseOption.call(this, option);
+            }
+            
+            // Add scoring when choice is made
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'choice_made');
+                    
+                    // Check if it's a unique choice (minority option)
+                    // This would need to be implemented based on voting results
+                    // For now, we'll award points for participation
+                    
+                    // Award extra points for explanations
+                    setTimeout(() => {
+                        const explanation = prompt("Why did you choose that option? (Optional - earn extra points!)");
+                        if (explanation && explanation.trim().length > 10) {
+                            scoreManager.addPoints(currentPlayer.id, 'explanation_given');
+                        }
+                    }, 1000);
+                }
+            }
+        };
+        
+        // Add scoring panel to game
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof scoreManager !== 'undefined') {
+                const gameScreen = document.getElementById('gameScreen');
+                if (gameScreen) {
+                    const scoringPanel = document.createElement('div');
+                    scoringPanel.className = 'scoring-panel';
+                    scoringPanel.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        display: flex;
+                        gap: 10px;
+                        flex-direction: column;
+                        z-index: 1000;
+                    `;
+                    
+                    scoringPanel.innerHTML = `
+                        <button onclick="awardMajorityChoice()" class="scoring-btn majority-btn"
+                                style="background: #4ade80; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            📊 Majority Choice
+                        </button>
+                        <button onclick="awardUniqueChoice()" class="scoring-btn unique-btn"
+                                style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            ⚡ Unique Choice
+                        </button>
+                        <button onclick="awardExplanation()" class="scoring-btn explanation-btn"
+                                style="background: #8b5cf6; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            💭 Great Explanation
+                        </button>
+                        <button onclick="leaderboardUI.showQuickScore()" class="scoring-btn score-btn"
+                                style="background: #06b6d4; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            🏆 Quick Score
+                        </button>
+                    `;
+                    
+                    document.body.appendChild(scoringPanel);
+                }
+            }
+        });
+        
+        // Scoring functions
+        function awardMajorityChoice() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'majority_choice');
+                }
+            }
+        }
+        
+        function awardUniqueChoice() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'unique_choice');
+                }
+            }
+        }
+        
+        function awardExplanation() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'explanation_given');
+                }
+            }
         }
     </script>
 </body>

@@ -6,6 +6,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Ultimate Party Games Collection</title>
+    <link rel="stylesheet" href="room-styles.css">
+    <link rel="stylesheet" href="score-styles.css">
     <style>
         * {
             margin: 0;
@@ -387,6 +389,69 @@
                 transform: translateY(0);
             }
         }
+
+        /* Room Action Buttons */
+        .room-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .room-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 140px;
+        }
+
+        .room-btn:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2));
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .room-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .create-room-btn:hover {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border-color: #4CAF50;
+        }
+
+        .join-room-btn:hover {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            border-color: #2196F3;
+        }
+
+        .solo-play-btn:hover {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            border-color: #FF9800;
+        }
+
+        @media (max-width: 480px) {
+            .room-actions {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .room-btn {
+                width: 200px;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -396,6 +461,25 @@
         <div class="header">
             <h1 class="main-title">🎉 Ultimate Party Games 🎉</h1>
             <p class="subtitle">The perfect collection for unforgettable party moments!</p>
+            
+            <!-- Room Action Buttons -->
+            <div class="room-actions">
+                <button class="room-btn create-room-btn" onclick="roomUI.showCreateRoomModal()">
+                    🎮 Create Room
+                </button>
+                <button class="room-btn join-room-btn" onclick="roomUI.showJoinRoomModal()">
+                    🚪 Join Room
+                </button>
+                <button class="room-btn solo-play-btn" onclick="toggleSoloMode()">
+                    👤 Solo Play
+                </button>
+                <button class="room-btn leaderboard-btn" onclick="leaderboardUI.showLeaderboard()">
+                    🏆 Leaderboard
+                </button>
+                <button class="room-btn timer-btn" onclick="showTimerModal()">
+                    ⏰ Quick Timer
+                </button>
+            </div>
         </div>
 
         <!-- Featured Games Section -->
@@ -652,6 +736,10 @@
         </div>
     </div>
 
+    <!-- Include Room Management Scripts -->
+    <script src="room-manager.js"></script>
+    <script src="room-ui.js"></script>
+
     <script>
         // Create floating particles
         function createParticles() {
@@ -678,11 +766,30 @@
 
         // Open existing game files
         function openGame(gameFile) {
+            // Check if in room mode
+            if (roomManager.currentRoom) {
+                // If in a room, show room selection instead
+                roomUI.showRoomLobby();
+                return;
+            }
+            
             // Add a loading effect
             document.body.style.cursor = 'wait';
             
             // Open the game file
             window.location.href = gameFile;
+        }
+
+        // Toggle solo play mode
+        function toggleSoloMode() {
+            // Leave any existing room
+            if (roomManager.currentRoom) {
+                roomManager.leaveRoom();
+                roomUI.hideRoomLobby();
+            }
+            
+            // Show games grid for solo play
+            roomUI.showSuccess('Solo play mode activated! Choose any game to play alone.');
         }
 
         // Open built-in games (coming soon)
@@ -762,6 +869,127 @@
                 this.style.animation = 'shimmer 3s ease-in-out infinite';
             }, 10);
         });
+    </script>
+    
+    <!-- Scoring System Scripts -->
+    <script src="score-manager.js"></script>
+    <script src="leaderboard-ui.js"></script>
+    <script src="timer-manager.js"></script>
+    <script>
+        // Timer Modal Functions
+        function showTimerModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>⏰ Quick Timer</h2>
+                        <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="timer-presets">
+                            <button class="preset-btn" onclick="startPresetTimer('round')">
+                                🎯 Round Timer (1 min)
+                            </button>
+                            <button class="preset-btn" onclick="startPresetTimer('turn')">
+                                ⏱️ Turn Timer (30 sec)
+                            </button>
+                            <button class="preset-btn" onclick="startPresetTimer('thinking')">
+                                🤔 Think Fast (15 sec)
+                            </button>
+                            <button class="preset-btn" onclick="startPresetTimer('challenge')">
+                                🎪 Challenge Timer (2 min)
+                            </button>
+                        </div>
+                        <div class="custom-timer">
+                            <h3>Custom Timer</h3>
+                            <input type="number" id="custom-duration" placeholder="Duration (seconds)" min="1" max="3600" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #ddd; margin: 10px 0;">
+                            <input type="text" id="custom-title" placeholder="Timer Title (optional)" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #ddd; margin: 10px 0;">
+                            <button class="preset-btn" onclick="startCustomTimer()">
+                                🎯 Start Custom Timer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('show'), 100);
+            
+            // Add styles for timer modal
+            if (!document.getElementById('timer-modal-styles')) {
+                const timerStyles = document.createElement('style');
+                timerStyles.id = 'timer-modal-styles';
+                timerStyles.textContent = `
+                    .timer-presets {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 15px;
+                        margin-bottom: 25px;
+                    }
+                    
+                    .preset-btn {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        padding: 15px 20px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 1em;
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    }
+                    
+                    .preset-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+                    }
+                    
+                    .custom-timer {
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 12px;
+                        color: #333;
+                    }
+                    
+                    .custom-timer h3 {
+                        margin-bottom: 15px;
+                        color: #667eea;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .timer-presets {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                `;
+                document.head.appendChild(timerStyles);
+            }
+        }
+        
+        function startPresetTimer(type) {
+            const timer = timerManager.createQuickTimer(type);
+            timerManager.startTimer(timer.id);
+            document.querySelector('.modal-overlay').remove();
+        }
+        
+        function startCustomTimer() {
+            const duration = parseInt(document.getElementById('custom-duration').value);
+            const title = document.getElementById('custom-title').value || 'Custom Timer';
+            
+            if (!duration || duration < 1) {
+                alert('Please enter a valid duration!');
+                return;
+            }
+            
+            const timer = timerManager.createTimer('custom-' + Date.now(), duration, {
+                title: title,
+                color: '#667eea'
+            });
+            
+            timerManager.startTimer(timer.id);
+            document.querySelector('.modal-overlay').remove();
+        }
     </script>
 </body>
 </html>

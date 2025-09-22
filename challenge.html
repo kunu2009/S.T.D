@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Ultimate Challenge Roulette</title>
+    <link rel="stylesheet" href="score-styles.css">
     <style>
         * {
             margin: 0;
@@ -1849,5 +1850,80 @@
             e.preventDefault();
         }, { passive: false });
     </script>
+    
+    <!-- Scoring System Integration -->
+    <script src="room-manager.js"></script>
+    <script src="score-manager.js"></script>
+    <script src="leaderboard-ui.js"></script>
+    <script>
+        // Integrate scoring with Challenge Roulette
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof scoreManager !== 'undefined') {
+                const gameContainer = document.querySelector('.container');
+                if (gameContainer) {
+                    const scoringPanel = document.createElement('div');
+                    scoringPanel.className = 'scoring-panel';
+                    scoringPanel.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        display: flex;
+                        gap: 10px;
+                        flex-direction: column;
+                        z-index: 1000;
+                    `;
+                    
+                    scoringPanel.innerHTML = `
+                        <button onclick="awardChallengeCompleted()" class="scoring-btn challenge-btn"
+                                style="background: #4ade80; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            ✅ Challenge Done
+                        </button>
+                        <button onclick="awardEpicChallenge()" class="scoring-btn epic-btn"
+                                style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            🔥 Epic Challenge
+                        </button>
+                        <button onclick="awardChallengeSkipped()" class="scoring-btn skip-btn"
+                                style="background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            ⏭️ Challenge Skipped
+                        </button>
+                        <button onclick="leaderboardUI.showQuickScore()" class="scoring-btn score-btn"
+                                style="background: #8b5cf6; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 0.9em;">
+                            🏆 Quick Score
+                        </button>
+                    `;
+                    
+                    document.body.appendChild(scoringPanel);
+                }
+            }
+        });
+        
+        // Scoring functions
+        function awardChallengeCompleted() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'dare_completed');
+                }
+            }
+        }
+        
+        function awardEpicChallenge() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'epic_dare');
+                }
+            }
+        }
+        
+        function awardChallengeSkipped() {
+            if (typeof scoreManager !== 'undefined' && roomManager.getCurrentRoom()) {
+                const currentPlayer = roomManager.getCurrentPlayer();
+                if (currentPlayer) {
+                    scoreManager.addPoints(currentPlayer.id, 'dare_skipped');
+                }
+            }
+        }
+    </script>
 </body>
-    </html>
+</html>
