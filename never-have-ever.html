@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Never Have I Ever - Party Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: bold;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-5px);
+        }
+
+        .setup-screen {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .setup-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #e67e22;
+        }
+
+        .players-section {
+            margin-bottom: 25px;
+        }
+
+        .players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .add-player-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .add-player-btn:active {
+            transform: scale(0.95);
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .player-number {
+            background: #e67e22;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .player-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .player-input:focus {
+            outline: none;
+            border-color: #e67e22;
+        }
+
+        .remove-player-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .game-screen {
+            display: none;
+            flex: 1;
+        }
+
+        .current-statement {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .statement-text {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .highlight {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .player-card {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 3px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-card:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .player-card.done {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+
+        .player-card.passed {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: #f44336;
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .player-status {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .player-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .action-btn.next {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .game-stats {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .winner-screen {
+            display: none;
+            text-align: center;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            color: #333;
+        }
+
+        .winner-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 20px;
+        }
+
+        .winner-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 480px) {
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🙋 Never Have I Ever</h1>
+            <p class="subtitle">Share secrets and learn surprising facts!</p>
+        </div>
+
+        <!-- Setup Screen -->
+        <div id="setupScreen" class="setup-screen">
+            <h2 class="setup-title">Game Setup</h2>
+            
+            <div class="players-section">
+                <div class="players-header">
+                    <span class="section-label">Players (3-10)</span>
+                    <button class="add-player-btn" onclick="addPlayer()">+ Add Player</button>
+                </div>
+                <div class="players-list" id="playersList">
+                    <!-- Players will be added here -->
+                </div>
+            </div>
+            
+            <button class="start-btn" id="startBtn" onclick="startGame()" disabled>
+                Start Game 🚀
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <div class="current-statement">
+                <p class="statement-text" id="statementText">
+                    <span class="highlight">Never have I ever</span> eaten pizza for breakfast
+                </p>
+            </div>
+
+            <div class="players-grid" id="playersGrid">
+                <!-- Player cards will be added here -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn next" onclick="nextStatement()">
+                    Next Statement ➡️
+                </button>
+            </div>
+
+            <div class="game-stats">
+                <h3 class="stats-title">Game Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="roundNumber">1</div>
+                        <div class="stat-label">Round</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalStatements">0</div>
+                        <div class="stat-label">Statements</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="secretsRevealed">0</div>
+                        <div class="stat-label">Secrets Revealed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Winner Screen -->
+        <div id="winnerScreen" class="winner-screen">
+            <h2 class="winner-title">🎉 Game Complete! 🎉</h2>
+            <p class="winner-name">Thanks for sharing!</p>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="playAgain()">Play Again</button>
+                <button class="action-btn next" onclick="goBack()">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            players: [],
+            currentStatement: 0,
+            statements: [
+                "eaten pizza for breakfast",
+                "lied about my age",
+                "forgotten someone's name right after being introduced",
+                "pretended to understand something I didn't",
+                "googled my own name",
+                "talked to myself in the mirror",
+                "practiced a conversation before having it",
+                "fallen asleep during a movie",
+                "pretended to be sick to avoid something",
+                "stalked someone on social media",
+                "sent a text to the wrong person",
+                "forgotten where I parked my car",
+                "watched the same movie more than 5 times",
+                "eaten food that fell on the floor",
+                "pretended to know a song I'd never heard",
+                "had an imaginary friend",
+                "talked to an animal like they could talk back",
+                "been scared of the dark as an adult",
+                "checked behind the shower curtain for someone hiding",
+                "tried to push a door that said 'pull'",
+                "waved back at someone who wasn't waving at me",
+                "pretended to be asleep to avoid talking to someone",
+                "googled something I should definitely know",
+                "taken a selfie with a celebrity (or tried to)",
+                "been embarrassed by my parents in public",
+                "had a crush on a fictional character",
+                "eaten an entire pizza by myself",
+                "stayed in my pajamas all day",
+                "pretended to be someone else online",
+                "laughed at a joke I didn't understand",
+                "forgotten what I was saying mid-sentence",
+                "used 'reply all' by mistake",
+                "gotten lost in my own neighborhood",
+                "tried to impress someone and failed miserably",
+                "been caught singing in the shower",
+                "pretended to know how to dance",
+                "fallen up the stairs",
+                "tried to pet an animal that didn't want to be petted",
+                "made up a word and used it in conversation",
+                "gotten excited about cancelled plans"
+            ],
+            secretsCount: 0
+        };
+
+        function addPlayer() {
+            const playersList = document.getElementById('playersList');
+            const playerCount = playersList.children.length + 1;
+            
+            if (playerCount > 10) {
+                alert('Maximum 10 players allowed!');
+                return;
+            }
+            
+            const playerGroup = document.createElement('div');
+            playerGroup.className = 'player-input-group';
+            playerGroup.innerHTML = `
+                <div class="player-number">${playerCount}</div>
+                <input type="text" class="player-input" placeholder="Enter player name" maxlength="20" oninput="updateStartButton()">
+                <button class="remove-player-btn" onclick="removePlayer(this)">×</button>
+            `;
+            
+            playersList.appendChild(playerGroup);
+            updatePlayerNumbers();
+            updateStartButton();
+        }
+
+        function removePlayer(btn) {
+            const playersList = document.getElementById('playersList');
+            if (playersList.children.length > 0) {
+                btn.parentElement.remove();
+                updatePlayerNumbers();
+                updateStartButton();
+            }
+        }
+
+        function updatePlayerNumbers() {
+            const playerGroups = document.querySelectorAll('.player-input-group');
+            playerGroups.forEach((group, index) => {
+                const numberElement = group.querySelector('.player-number');
+                numberElement.textContent = index + 1;
+            });
+        }
+
+        function updateStartButton() {
+            const inputs = document.querySelectorAll('.player-input');
+            const filledInputs = Array.from(inputs).filter(input => input.value.trim() !== '');
+            const startBtn = document.getElementById('startBtn');
+            
+            startBtn.disabled = filledInputs.length < 3;
+        }
+
+        function startGame() {
+            const inputs = document.querySelectorAll('.player-input');
+            gameState.players = Array.from(inputs)
+                .map(input => input.value.trim())
+                .filter(name => name !== '')
+                .map(name => ({
+                    name: name,
+                    score: 0,
+                    status: 'waiting'
+                }));
+
+            // Shuffle statements
+            gameState.statements.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            setupPlayersGrid();
+            showCurrentStatement();
+        }
+
+        function setupPlayersGrid() {
+            const playersGrid = document.getElementById('playersGrid');
+            playersGrid.innerHTML = '';
+            
+            gameState.players.forEach((player, index) => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.id = `player-${index}`;
+                playerCard.onclick = () => togglePlayerStatus(index);
+                
+                playerCard.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-status">Tap if you've done this</div>
+                    <div class="player-score">😇</div>
+                `;
+                
+                playersGrid.appendChild(playerCard);
+            });
+        }
+
+        function togglePlayerStatus(playerIndex) {
+            const player = gameState.players[playerIndex];
+            const playerCard = document.getElementById(`player-${playerIndex}`);
+            
+            if (player.status === 'waiting') {
+                player.status = 'done';
+                player.score++;
+                gameState.secretsCount++;
+                playerCard.classList.add('done');
+                playerCard.querySelector('.player-status').textContent = 'I have done this!';
+                playerCard.querySelector('.player-score').textContent = '😅';
+            } else if (player.status === 'done') {
+                player.status = 'passed';
+                player.score--;
+                gameState.secretsCount--;
+                playerCard.classList.remove('done');
+                playerCard.classList.add('passed');
+                playerCard.querySelector('.player-status').textContent = 'Never done this';
+                playerCard.querySelector('.player-score').textContent = '😇';
+            } else {
+                player.status = 'waiting';
+                playerCard.classList.remove('passed');
+                playerCard.querySelector('.player-status').textContent = 'Tap if you\'ve done this';
+                playerCard.querySelector('.player-score').textContent = '🤔';
+            }
+            
+            updateStats();
+        }
+
+        function showCurrentStatement() {
+            const statementText = document.getElementById('statementText');
+            const currentStatement = gameState.statements[gameState.currentStatement];
+            
+            statementText.innerHTML = `
+                <span class="highlight">Never have I ever</span> ${currentStatement}
+            `;
+            
+            // Reset player statuses
+            gameState.players.forEach((player, index) => {
+                player.status = 'waiting';
+                const playerCard = document.getElementById(`player-${index}`);
+                playerCard.className = 'player-card';
+                playerCard.querySelector('.player-status').textContent = 'Tap if you\'ve done this';
+                playerCard.querySelector('.player-score').textContent = '🤔';
+            });
+            
+            updateStats();
+        }
+
+        function nextStatement() {
+            gameState.currentStatement++;
+            
+            if (gameState.currentStatement >= gameState.statements.length || gameState.currentStatement >= 20) {
+                showWinner();
+                return;
+            }
+            
+            showCurrentStatement();
+        }
+
+        function updateStats() {
+            document.getElementById('roundNumber').textContent = gameState.currentStatement + 1;
+            document.getElementById('totalStatements').textContent = Math.min(gameState.statements.length, 20);
+            document.getElementById('secretsRevealed').textContent = gameState.secretsCount;
+        }
+
+        function showWinner() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winnerScreen').style.display = 'block';
+            
+            const mostSecrets = Math.max(...gameState.players.map(p => p.score));
+            const winner = gameState.players.find(p => p.score === mostSecrets);
+            
+            document.querySelector('.winner-name').textContent = 
+                `${winner.name} shared the most secrets! (${mostSecrets} reveals)`;
+        }
+
+        function playAgain() {
+            gameState.currentStatement = 0;
+            gameState.secretsCount = 0;
+            gameState.players.forEach(p => {
+                p.score = 0;
+                p.status = 'waiting';
+            });
+            
+            // Shuffle statements again
+            gameState.statements.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('winnerScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            showCurrentStatement();
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize with some players
+        document.addEventListener('DOMContentLoaded', function() {
+            addPlayer();
+            addPlayer();
+            addPlayer();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Ultimate Challenge Roulette</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px 10px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .title {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px 15px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .setup-screen {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            color: #333;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .mode-selector {
+            margin-bottom: 25px;
+        }
+
+        .mode-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-card {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.5s;
+        }
+
+        .mode-card:active::before {
+            transform: scale(1);
+        }
+
+        .mode-card.selected {
+            border-color: #FFD700;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .mode-emoji {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .mode-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .mode-desc {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+
+        .players-section {
+            margin-bottom: 20px;
+        }
+
+        .players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .players-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .add-player-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .add-player-btn:active {
+            transform: scale(0.95);
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .player-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .player-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .player-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .player-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .remove-player-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .remove-player-btn:active {
+            transform: scale(0.9);
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .start-button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .start-button:active {
+            transform: scale(0.98);
+        }
+
+        .start-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .player-selector {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .player-selector.selected {
+            animation: none;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .selecting-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .selected-player {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .player-score {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: min(300px, 80vw);
+            height: min(300px, 80vw);
+            margin: 0 auto 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #FF6B6B 0deg 60deg,
+                #4ECDC4 60deg 120deg,
+                #45B7D1 120deg 180deg,
+                #96CEB4 180deg 240deg,
+                #FFEAA7 240deg 300deg,
+                #DDA0DD 300deg 360deg
+            );
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            position: relative;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid white;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+
+        .spin-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(100px, 25vw);
+            height: min(100px, 25vw);
+            border-radius: 50%;
+            background: white;
+            color: #333;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 5;
+        }
+
+        .spin-button:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .challenge-card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 25px 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUpCard 0.5s ease;
+            display: none;
+        }
+
+        @keyframes slideUpCard {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--challenge-color);
+            color: white;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .change-challenge-btn {
+            position: absolute;
+            right: 10px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .change-challenge-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: rotate(180deg);
+        }
+
+        .change-challenge-btn:active {
+            transform: rotate(180deg) scale(0.9);
+        }
+
+        .challenge-type {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .challenge-difficulty {
+            background: rgba(255,255,255,0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .challenge-text {
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            line-height: 1.6;
+            text-align: center;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+
+        .challenge-for {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .timer-display {
+            font-size: clamp(2.5rem, 8vw, 3.5rem);
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #333;
+            display: none;
+        }
+
+        .timer-display.warning {
+            color: #ff6b6b;
+            animation: pulseTimer 1s infinite;
+        }
+
+        @keyframes pulseTimer {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .action-btn.fail {
+            background: linear-gradient(135deg, #f44336, #da190b);
+        }
+
+        .action-btn.skip {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+        }
+
+        .scoreboard {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .scoreboard-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .score-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .score-item.current {
+            background: rgba(255,215,0,0.3);
+            border: 2px solid #FFD700;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255,215,0,0.5); }
+            50% { box-shadow: 0 0 20px rgba(255,215,0,0.8); }
+        }
+
+        .score-name {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .score-points {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .winner-screen {
+            display: none;
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            margin: 20px 0;
+            animation: bounceIn 0.8s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .winner-trophy {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .winner-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .winner-score {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .final-scores {
+            background: #f5f5f5;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .play-again-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .play-again-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 360px) {
+            .mode-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* Prevent pull-to-refresh */
+        body {
+            overscroll-behavior-y: none;
+        }
+
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: floatUp 2s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-30px) scale(1);
+            }
+            100% {
+                transform: translateY(-60px) scale(0.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">🎯 Ultimate Challenge Roulette 🎯</div>
+        </div>
+
+        <div class="content">
+            <!-- Setup Screen -->
+            <div class="setup-screen" id="setupScreen">
+                <div class="mode-selector">
+                    <div class="mode-title">Choose Your Mode</div>
+                    <div class="mode-grid">
+                        <div class="mode-card" data-mode="easy" style="--gradient-start: #4CAF50; --gradient-end: #8BC34A;">
+                            <div class="mode-emoji">😊</div>
+                            <div class="mode-name">Easy</div>
+                            <div class="mode-desc">Fun & Simple</div>
+                        </div>
+                        <div class="mode-card" data-mode="normal" style="--gradient-start: #2196F3; --gradient-end: #03A9F4;">
+                            <div class="mode-emoji">😎</div>
+                            <div class="mode-name">Normal</div>
+                            <div class="mode-desc">Balanced Fun</div>
+                        </div>
+                        <div class="mode-card" data-mode="hard" style="--gradient-start: #FF9800; --gradient-end: #F57C00;">
+                            <div class="mode-emoji">💪</div>
+                            <div class="mode-name">Hard</div>
+                            <div class="mode-desc">Challenge Mode</div>
+                        </div>
+                        <div class="mode-card" data-mode="spicy" style="--gradient-start: #F44336; --gradient-end: #E91E63;">
+                            <div class="mode-emoji">🌶️</div>
+                            <div class="mode-name">Spicy</div>
+                            <div class="mode-desc">Truth & Dare</div>
+                        </div>
+                        <div class="mode-card" data-mode="extreme" style="--gradient-start: #9C27B0; --gradient-end: #673AB7;">
+                            <div class="mode-emoji">🔥</div>
+                            <div class="mode-name">Extreme</div>
+                            <div class="mode-desc">Crazy Stuff</div>
+                        </div>
+                        <div class="mode-card selected" data-mode="mixed" style="--gradient-start: #FF6B6B; --gradient-end: #4ECDC4;">
+                            <div class="mode-emoji">🎲</div>
+                            <div class="mode-name">Mixed</div>
+                            <div class="mode-desc">All Modes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="players-section">
+                    <div class="players-header">
+                        <div class="players-title">Players</div>
+                        <button class="add-player-btn" onclick="addPlayer()">
+                            <span>➕</span>
+                            <span>Add Player</span>
+                        </button>
+                    </div>
+                    <div class="players-list" id="playersList">
+                        <div class="player-input-group">
+                            <div class="player-number">1</div>
+                            <input type="text" class="player-input" placeholder="Enter name" maxlength="20">
+                        </div>
+                        <div class="player-input-group">
+                            <div class="player-number">2</div>
+                            <input type="text" class="player-input" placeholder="Enter name" maxlength="20">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="start-button" onclick="startGame()" id="startButton">
+                    Start Game 🚀
+                </button>
+            </div>
+
+            <!-- Game Screen -->
+            <div class="game-screen" id="gameScreen">
+                <div class="player-selector" id="playerSelector">
+                    <div class="selecting-text" id="selectingText">Spin to select a player!</div>
+                    <div class="selected-player" id="selectedPlayer">???</div>
+                    <div class="player-score" id="selectedPlayerScore"></div>
+                </div>
+
+                <div class="wheel-container">
+                    <div class="wheel-pointer"></div>
+                    <div class="wheel" id="wheel">
+                        <!-- Wheel sections will be drawn here -->
+                    </div>
+                    <button class="spin-button" id="spinButton" onclick="spinWheel()">SPIN!</button>
+                </div>
+
+                <div class="challenge-card" id="challengeCard">
+                    <div class="challenge-header" id="challengeHeader">
+                        <span class="challenge-type" id="challengeType">Challenge</span>
+                        <span class="challenge-difficulty" id="challengeDifficulty">EASY</span>
+                        <button class="change-challenge-btn" onclick="changeChallenge()" title="Change Challenge">🔄</button>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="challenge-for" id="challengeFor">Player Name</div>
+                    </div>
+                    <div class="challenge-text" id="challengeText">
+                        Challenge will appear here
+                    </div>
+                    <div class="timer-display" id="timerDisplay">30</div>
+                    <div class="action-buttons" id="actionButtons">
+                        <!-- Buttons will be added dynamically -->
+                    </div>
+                </div>
+
+                <div class="scoreboard">
+                    <div class="scoreboard-title">📊 Scoreboard</div>
+                    <div class="score-list" id="scoreList">
+                        <!-- Scores will be shown here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Winner Screen -->
+            <div class="winner-screen" id="winnerScreen">
+                <div class="winner-trophy">🏆</div>
+                <div class="winner-name" id="winnerName">Winner!</div>
+                <div class="winner-score" id="winnerScore">Score: 0</div>
+                <div class="final-scores" id="finalScores">
+                    <!-- Final scores will be shown here -->
+                </div>
+                <button class="play-again-btn" onclick="location.reload()">
+                    Play Again! 🎮
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            mode: 'mixed',
+            players: [],
+            currentPlayer: null,
+            currentCategory: null,
+            currentDifficulty: null,
+            scores: {},
+            spinning: false,
+            selectingPlayer: false,
+            timer: null,
+            targetScore: 100,
+            usedChallenges: new Set()
+        };
+
+        // Massive Challenge Database
+        const challenges = {
+            acting: {
+                emoji: '🎭',
+                color: '#FF6B6B',
+                easy: [
+                    { text: "Act like a happy puppy for 30 seconds", time: 30 },
+                    { text: "Pretend to be a robot", time: 30 },
+                    { text: "Act out brushing your teeth dramatically", time: 20 },
+                    { text: "Pretend you're a superhero flying", time: 30 },
+                    { text: "Act like you're walking on the moon", time: 30 },
+                    { text: "Mime eating your favorite food", time: 20 },
+                    { text: "Act like a cat for 30 seconds", time: 30 },
+                    { text: "Pretend to be a famous chef cooking", time: 30 },
+                    { text: "Act out your morning routine in fast forward", time: 30 },
+                    { text: "Pretend to be a news reporter", time: 30 },
+                    { text: "Act like a monkey eating bananas", time: 25 },
+                    { text: "Pretend to be underwater", time: 30 },
+                    { text: "Act like you're in a wind storm", time: 25 },
+                    { text: "Mime playing different sports", time: 40 }
+                ],
+                normal: [
+                    { text: "Act out a movie title - others guess", time: 45 },
+                    { text: "Pretend to be stuck in a box", time: 30 },
+                    { text: "Act like you're in a silent movie", time: 45 },
+                    { text: "Mime 3 different sports - others guess", time: 60 },
+                    { text: "Act out your biggest fear without speaking", time: 30 },
+                    { text: "Pretend to be a waiter serving invisible food", time: 45 },
+                    { text: "Act like different animals until someone guesses 3 correctly", time: 60 },
+                    { text: "Recreate a famous movie scene", time: 45 },
+                    { text: "Act out a fairy tale in 30 seconds", time: 30 },
+                    { text: "Pretend to be a mime stuck in a storm", time: 30 },
+                    { text: "Act out your favorite TV show without words", time: 45 },
+                    { text: "Mime your dream job", time: 30 },
+                    { text: "Act out a whole day in 60 seconds", time: 60 },
+                    { text: "Pretend to be different types of dancers", time: 45 }
+                ],
+                hard: [
+                    { text: "Act out an entire story with beginning, middle, and end - no words", time: 90 },
+                    { text: "Recreate a TikTok dance from memory", time: 45 },
+                    { text: "Act out 5 emotions in a row - others guess each", time: 60 },
+                    { text: "Perform a one-person play about your day", time: 60 },
+                    { text: "Act out a song title using only gestures", time: 45 },
+                    { text: "Do impressions of 3 celebrities", time: 60 },
+                    { text: "Act out your life story in 60 seconds", time: 60 },
+                    { text: "Mime an entire cooking show episode", time: 90 },
+                    { text: "Act out a weather forecast for different planets", time: 60 },
+                    { text: "Recreate a viral video from memory", time: 45 },
+                    { text: "Perform all roles in a famous movie scene", time: 75 },
+                    { text: "Act out the evolution of dance", time: 90 },
+                    { text: "Mime painting a masterpiece and have others guess what it is", time: 60 }
+                ],
+                spicy: [
+                    { text: "Act out your most embarrassing moment", time: 45 },
+                    { text: "Pretend to flirt with an invisible person", time: 30 },
+                    { text: "Act out your worst date ever", time: 45 },
+                    { text: "Demonstrate your secret talent dramatically", time: 30 },
+                    { text: "Act like you're proposing to the person on your left", time: 30 },
+                    { text: "Recreate your first kiss (with air)", time: 20 },
+                    { text: "Act out your biggest guilty pleasure", time: 30 },
+                    { text: "Pretend to be on a reality dating show", time: 45 },
+                    { text: "Act out your dream romantic scenario", time: 45 },
+                    { text: "Demonstrate your best pickup line with actions only", time: 30 },
+                    { text: "Act out your walk of shame", time: 30 },
+                    { text: "Mime seducing someone", time: 30 },
+                    { text: "Act out your bedroom routine", time: 40 }
+                ],
+                extreme: [
+                    { text: "Act out being possessed by the person to your right", time: 60 },
+                    { text: "Perform an interpretive dance about your feelings", time: 60 },
+                    { text: "Act like you're giving birth to a watermelon", time: 30 },
+                    { text: "Recreate your weirdest dream", time: 60 },
+                    { text: "Act out a dramatic death scene", time: 45 },
+                    { text: "Pretend to be an alien discovering humans for the first time", time: 60 },
+                    { text: "Act out a full transformation into a werewolf", time: 45 },
+                    { text: "Perform a dramatic reading of the last text you sent", time: 30 },
+                    { text: "Act like you're in a telenovela", time: 60 },
+                    { text: "Recreate the evolution of humans in 60 seconds", time: 60 },
+                    { text: "Act out your own funeral eulogy", time: 60 },
+                    { text: "Perform an exorcism on an object", time: 45 },
+                    { text: "Act out giving birth to yourself", time: 45 }
+                ]
+            },
+            physical: {
+                emoji: '🏃',
+                color: '#4ECDC4',
+                easy: [
+                    { text: "Do 10 jumping jacks", time: 20 },
+                    { text: "Touch your toes 10 times", time: 20 },
+                    { text: "Hop on one foot for 15 seconds", time: 15 },
+                    { text: "Do 5 star jumps", time: 15 },
+                    { text: "Walk like a crab across the room", time: 30 },
+                    { text: "Do the chicken dance", time: 30 },
+                    { text: "Spin around 5 times", time: 15 },
+                    { text: "Do 10 high knees", time: 20 },
+                    { text: "March in place for 30 seconds", time: 30 },
+                    { text: "Do 5 squats", time: 20 },
+                    { text: "Balance a book on your head for 20 seconds", time: 20 },
+                    { text: "Do arm circles for 30 seconds", time: 30 },
+                    { text: "Skip around the room", time: 20 },
+                    { text: "Do the macarena", time: 30 }
+                ],
+                normal: [
+                    { text: "Do 15 push-ups (knee push-ups allowed)", time: 45 },
+                    { text: "Hold a plank for 30 seconds", time: 30 },
+                    { text: "Do 20 sit-ups", time: 45 },
+                    { text: "Balance on one foot for 45 seconds", time: 45 },
+                    { text: "Do 15 burpees", time: 60 },
+                    { text: "Wall sit for 30 seconds", time: 30 },
+                    { text: "Do mountain climbers for 30 seconds", time: 30 },
+                    { text: "Perform 10 lunges on each leg", time: 45 },
+                    { text: "Hold a bridge position for 30 seconds", time: 30 },
+                    { text: "Do arm circles for 1 minute", time: 60 },
+                    { text: "Bear crawl across the room", time: 30 },
+                    { text: "Do 20 Russian twists", time: 30 },
+                    { text: "Jump rope (air rope) for 45 seconds", time: 45 },
+                    { text: "Do 15 tricep dips using a chair", time: 45 }
+                ],
+                hard: [
+                    { text: "Do 30 push-ups", time: 60 },
+                    { text: "Hold a plank for 1 minute", time: 60 },
+                    { text: "Do 50 jumping jacks while counting backwards from 50", time: 60 },
+                    { text: "Balance a book on your head while doing 10 squats", time: 45 },
+                    { text: "Army crawl across the room and back", time: 60 },
+                    { text: "Do 25 burpees", time: 90 },
+                    { text: "Hold a wall sit for 1 minute", time: 60 },
+                    { text: "Do jumping lunges for 30 seconds", time: 30 },
+                    { text: "Perform a handstand against the wall for 15 seconds", time: 30 },
+                    { text: "Do bicycle crunches for 1 minute", time: 60 },
+                    { text: "Do 40 mountain climbers", time: 45 },
+                    { text: "Hold side planks for 30 seconds each side", time: 60 },
+                    { text: "Do 20 diamond push-ups", time: 45 },
+                    { text: "Do jump squats for 45 seconds", time: 45 }
+                ],
+                spicy: [
+                    { text: "Give the person to your right a piggyback ride across the room", time: 30 },
+                    { text: "Do a sexy dance for 30 seconds", time: 30 },
+                    { text: "Do push-ups while someone sits on your back", time: 30 },
+                    { text: "Twerk for 20 seconds", time: 20 },
+                    { text: "Do a lap dance on a chair", time: 30 },
+                    { text: "Body spell 'LOVE' with another player", time: 30 },
+                    { text: "Do squats while maintaining eye contact with someone", time: 30 },
+                    { text: "Slow dance with an invisible partner sensually", time: 45 },
+                    { text: "Do the worm or attempt it", time: 20 },
+                    { text: "Give someone a shoulder massage while doing squats", time: 45 },
+                    { text: "Do a striptease (keep clothes on, just act)", time: 45 },
+                    { text: "Grind on the wall for 20 seconds", time: 20 },
+                    { text: "Do body rolls for 30 seconds", time: 30 }
+                ],
+                extreme: [
+                    { text: "Do 50 burpees - no breaks", time: 120 },
+                    { text: "Hold a plank for 2 minutes", time: 120 },
+                    { text: "Do push-ups until failure", time: 0 },
+                    { text: "Bear crawl around the room 3 times", time: 90 },
+                    { text: "Do 100 jumping jacks", time: 90 },
+                    { text: "Hold a squat position for 90 seconds", time: 90 },
+                    { text: "Do diamond push-ups for 30 seconds", time: 30 },
+                    { text: "Perform 50 mountain climbers", time: 60 },
+                    { text: "Do jump squats for 1 minute", time: 60 },
+                    { text: "Hold three different yoga poses for 30 seconds each", time: 90 },
+                    { text: "Do 75 sit-ups", time: 90 },
+                    { text: "Sprint in place for 90 seconds", time: 90 },
+                    { text: "Do pistol squats (or attempt)", time: 60 }
+                ]
+            },
+            mental: {
+                emoji: '🧠',
+                color: '#45B7D1',
+                easy: [
+                    { text: "Count backwards from 20", time: 20 },
+                    { text: "Name 10 animals", time: 30 },
+                    { text: "Say the alphabet", time: 20 },
+                    { text: "Name 5 colors in another language", time: 30 },
+                    { text: "List 10 things in your room", time: 30 },
+                    { text: "Name all the months of the year", time: 30 },
+                    { text: "Count by 5s to 100", time: 30 },
+                    { text: "Name 10 fruits", time: 30 },
+                    { text: "Spell your name backwards", time: 15 },
+                    { text: "Name 7 days of the week backwards", time: 20 },
+                    { text: "List 10 things that are red", time: 30 },
+                    { text: "Name 5 Disney movies", time: 20 },
+                    { text: "Count to 30 in another language", time: 40 },
+                    { text: "Name 10 body parts", time: 25 }
+                ],
+                normal: [
+                    { text: "Name 20 countries in 30 seconds", time: 30 },
+                    { text: "List 15 words that rhyme with 'cat'", time: 45 },
+                    { text: "Name a fruit or vegetable for each letter A-M", time: 60 },
+                    { text: "Count backwards from 100 by 7s", time: 60 },
+                    { text: "Name 20 movie titles", time: 45 },
+                    { text: "List 15 things you can do with a paperclip", time: 45 },
+                    { text: "Name all US states or your country's regions", time: 90 },
+                    { text: "Say the alphabet backwards", time: 45 },
+                    { text: "Name 25 animals in alphabetical order", time: 60 },
+                    { text: "List 20 verbs in 30 seconds", time: 30 },
+                    { text: "Name 15 car brands", time: 45 },
+                    { text: "List 20 adjectives that describe you", time: 45 },
+                    { text: "Name 15 things you'd find at the beach", time: 30 },
+                    { text: "List all the prime numbers under 50", time: 60 }
+                ],
+                hard: [
+                    { text: "Multiply 13 x 17 in your head", time: 30 },
+                    { text: "Name the capitals of 15 countries", time: 60 },
+                    { text: "Spell 'hippopotamus' backwards", time: 30 },
+                    { text: "Name 30 words starting with 'S' in 45 seconds", time: 45 },
+                    { text: "Calculate the number of seconds in a day", time: 45 },
+                    { text: "Name all elements on the periodic table you know", time: 90 },
+                    { text: "List 25 car brands", time: 60 },
+                    { text: "Name 20 historical figures", time: 60 },
+                    { text: "Count in binary to 16", time: 45 },
+                    { text: "Name 15 Shakespeare plays or famous books", time: 60 },
+                    { text: "List all countries in Europe", time: 90 },
+                    { text: "Name 20 programming languages", time: 60 },
+                    { text: "Calculate 15% tip on $87.43", time: 30 },
+                    { text: "Name 30 cities around the world", time: 60 }
+                ],
+                spicy: [
+                    { text: "Name your crushes from elementary school to now", time: 60 },
+                    { text: "List 10 things that turn you on", time: 45 },
+                    { text: "Describe your ideal partner in exactly 20 words", time: 45 },
+                    { text: "Name all the people in this room you'd date", time: 30 },
+                    { text: "List 5 places you'd like to have sex", time: 30 },
+                    { text: "Name 10 things you find attractive in people", time: 45 },
+                    { text: "Describe your worst kiss in 3 words", time: 15 },
+                    { text: "List your relationship deal-breakers", time: 45 },
+                    { text: "Name celebrities you find attractive A-Z", time: 90 },
+                    { text: "Rate everyone in the room's kissing potential 1-10", time: 60 },
+                    { text: "List your kinks using only emoji descriptions", time: 45 },
+                    { text: "Name 10 sexy words", time: 30 },
+                    { text: "List 5 fantasies you've never told anyone", time: 60 }
+                ],
+                extreme: [
+                    { text: "Solve: (23 x 14) + (97 - 43) ÷ 2", time: 60 },
+                    { text: "Name 50 words without using the letter 'E'", time: 90 },
+                    { text: "List all prime numbers up to 100", time: 90 },
+                    { text: "Recite pi to as many digits as you can", time: 30 },
+                    { text: "Name 40 world capitals", time: 120 },
+                    { text: "Spell the longest word you know, then define it", time: 45 },
+                    { text: "Count from 1-50 in a foreign language", time: 60 },
+                    { text: "Name all Nobel Prize categories and a winner from each", time: 90 },
+                    { text: "List 30 phobias", time: 90 },
+                    { text: "Name 25 programming languages or scientific terms", time: 60 },
+                    { text: "Calculate the square root of 169, 256, and 324", time: 45 },
+                    { text: "Name all countries starting with 'A' through 'E'", time: 90 },
+                    { text: "List the first 20 elements of the periodic table in order", time: 60 }
+                ]
+            },
+            funny: {
+                emoji: '😂',
+                color: '#96CEB4',
+                easy: [
+                    { text: "Make a funny face and hold it for 10 seconds", time: 10 },
+                    { text: "Tell a dad joke", time: 20 },
+                    { text: "Laugh like different animals", time: 30 },
+                    { text: "Do your best baby voice for 30 seconds", time: 30 },
+                    { text: "Make everyone laugh without talking", time: 30 },
+                    { text: "Walk like a penguin", time: 20 },
+                    { text: "Talk like a pirate for 1 minute", time: 60 },
+                    { text: "Make the ugliest face possible", time: 10 },
+                    { text: "Pretend to be a chicken laying an egg", time: 20 },
+                    { text: "Do a silly dance", time: 30 },
+                    { text: "Speak in a funny accent for 2 minutes", time: 120 },
+                    { text: "Make weird noises for 20 seconds", time: 20 },
+                    { text: "Pretend to sneeze in slow motion", time: 15 },
+                    { text: "Do your best evil laugh", time: 15 }
+                ],
+                normal: [
+                    { text: "Roast yourself for 30 seconds", time: 30 },
+                    { text: "Do your best impression of someone in the room", time: 30 },
+                    { text: "Sing a nursery rhyme in an opera voice", time: 30 },
+                    { text: "Talk in rhymes for the next minute", time: 60 },
+                    { text: "Make up a rap about bananas", time: 45 },
+                    { text: "Speak only in song lyrics for 2 minutes", time: 120 },
+                    { text: "Do a dramatic reading of a restaurant menu", time: 45 },
+                    { text: "Commentate your life like a sports announcer for 1 minute", time: 60 },
+                    { text: "Tell a story but replace every noun with 'banana'", time: 60 },
+                    { text: "Pretend to be a cat trying to get attention", time: 30 },
+                    { text: "Do stand-up comedy about your morning", time: 45 },
+                    { text: "Narrate what everyone is doing like David Attenborough", time: 60 },
+                    { text: "Speak like you're always asking questions?", time: 60 },
+                    { text: "Pretend to be a robot malfunctioning", time: 30 }
+                ],
+                hard: [
+                    { text: "Do stand-up comedy for 1 minute", time: 60 },
+                    { text: "Improvise a song about the person to your left", time: 45 },
+                    { text: "Speak backwards for the next 2 minutes", time: 120 },
+                    { text: "Create a commercial for a useless product", time: 60 },
+                    { text: "Debate why hot dogs are sandwiches passionately", time: 60 },
+                    { text: "Narrate a nature documentary about the people in the room", time: 90 },
+                    { text: "Pretend to be a YouTuber doing a makeup tutorial on someone", time: 60 },
+                    { text: "Host a cooking show making an imaginary disgusting meal", time: 60 },
+                    { text: "Do ASMR with random objects for 1 minute", time: 60 },
+                    { text: "Perform a one-person circus act", time: 45 },
+                    { text: "Roast everyone in the room (nicely)", time: 90 },
+                    { text: "Create and perform a theme song for each person", time: 120 },
+                    { text: "Do a TED talk about something ridiculous", time: 90 },
+                    { text: "Pretend to be Gordon Ramsay judging everyone's outfit", time: 60 }
+                ],
+                spicy: [
+                    { text: "Demonstrate your O-face", time: 10 },
+                    { text: "Moan while eating an invisible banana", time: 20 },
+                    { text: "Do your sexiest crawl across the floor", time: 20 },
+                    { text: "Read the ingredients of something nearby seductively", time: 30 },
+                    { text: "Show your flirting technique on a pillow", time: 30 },
+                    { text: "Make bedroom noises for 15 seconds", time: 15 },
+                    { text: "Demonstrate how you'd seduce someone using only facial expressions", time: 30 },
+                    { text: "Talk dirty to an inanimate object", time: 30 },
+                    { text: "Show your sexy walk", time: 20 },
+                    { text: "Whisper sweet nothings to the person on your right", time: 30 },
+                    { text: "Do your morning after walk of shame", time: 20 },
+                    { text: "Fake an orgasm dramatically", time: 15 },
+                    { text: "Show how you'd eat food seductively", time: 30 }
+                ],
+                extreme: [
+                    { text: "Let others write something on your face with marker", time: 0 },
+                    { text: "Let the group give you a makeover", time: 180 },
+                    { text: "Eat a spoonful of hot sauce or something spicy", time: 0 },
+                    { text: "Let someone draw on you with washable marker", time: 60 },
+                    { text: "Wear your clothes backwards for the rest of the game", time: 0 },
+                    { text: "Let everyone add one item of clothing/accessory to you", time: 0 },
+                    { text: "Speak in gibberish for the next 3 rounds", time: 0 },
+                    { text: "Let someone style your hair however they want", time: 120 },
+                    { text: "Do the next 3 challenges with your eyes closed", time: 0 },
+                    { text: "Let the group choose your nickname for the rest of the game", time: 0 },
+                    { text: "Wear underwear on your head for 5 minutes", time: 300 },
+                    { text: "Let someone feed you mystery food blindfolded", time: 0 },
+                    { text: "Exchange an item of clothing with someone", time: 0 }
+                ]
+            },
+            creative: {
+                emoji: '🎨',
+                color: '#FFEAA7',
+                easy: [
+                    { text: "Draw a smiley face in the air", time: 15 },
+                    { text: "Make up a short poem about pizza", time: 30 },
+                    { text: "Create a new handshake", time: 30 },
+                    { text: "Invent a new word and define it", time: 30 },
+                    { text: "Make up a jingle for a made-up product", time: 45 },
+                    { text: "Design a new emoji and describe it", time: 30 },
+                    { text: "Create a new dance move", time: 30 },
+                    { text: "Make up names for everyone in the room", time: 45 },
+                    { text: "Invent a new holiday and its traditions", time: 45 },
+                    { text: "Create sound effects for a story someone tells", time: 60 },
+                    { text: "Make up a superhero name and power", time: 30 },
+                    { text: "Create a new ice cream flavor", time: 20 },
+                    { text: "Invent a new sport using only your hands", time: 30 },
+                    { text: "Make up a nursery rhyme", time: 30 }
+                ],
+                normal: [
+                    { text: "Write and perform a haiku about the person across from you", time: 60 },
+                    { text: "Create a theme song for yourself and perform it", time: 60 },
+                    { text: "Design a new sport with rules", time: 90 },
+                    { text: "Choreograph a 30-second dance routine", time: 60 },
+                    { text: "Create a new language and teach us 5 words", time: 60 },
+                    { text: "Make up a fairy tale with everyone as characters", time: 90 },
+                    { text: "Design a new flag for your group", time: 45 },
+                    { text: "Create a secret code and send a message", time: 60 },
+                    { text: "Invent a new ice cream flavor and describe it", time: 30 },
+                    { text: "Make up a conspiracy theory about someone in the room", time: 45 },
+                    { text: "Create a boy/girl band name and first hit song", time: 45 },
+                    { text: "Design a theme park ride", time: 60 },
+                    { text: "Make up origin stories for everyone", time: 90 },
+                    { text: "Create a new social media platform concept", time: 60 }
+                ],
+                hard: [
+                    { text: "Perform a 2-minute improvised musical about your life", time: 120 },
+                    { text: "Create a boy/girl band with others and perform a song", time: 180 },
+                    { text: "Write and perform a rap battle against yourself", time: 90 },
+                    { text: "Design a board game and explain the rules", time: 120 },
+                    { text: "Create a 1-minute commercial for the person to your left", time: 90 },
+                    { text: "Choreograph and teach a TikTok dance", time: 120 },
+                    { text: "Write a love song about an object in the room", time: 90 },
+                    { text: "Create a new superhero with origin story and powers", time: 90 },
+                    { text: "Design a fashion line and do a runway show", time: 120 },
+                    { text: "Create and perform a puppet show with your hands", time: 90 },
+                    { text: "Write and perform a standup routine about the group", time: 120 },
+                    { text: "Create a movie plot with everyone as characters", time: 90 },
+                    { text: "Design and pitch a new app idea", time: 90 },
+                    { text: "Create a restaurant concept with full menu", time: 120 }
+                ],
+                spicy: [
+                    { text: "Write a steamy poem about someone in the room", time: 60 },
+                    { text: "Create a pickup line for each person present", time: 90 },
+                    { text: "Design lingerie for someone and describe it", time: 45 },
+                    { text: "Write erotica featuring two people in the room (no names)", time: 90 },
+                    { text: "Create a sexy perfume/cologne commercial", time: 60 },
+                    { text: "Choreograph a lap dance routine (demonstrate on chair)", time: 60 },
+                    { text: "Write a dating profile for the person to your right", time: 60 },
+                    { text: "Create a love potion recipe with weird ingredients", time: 45 },
+                    { text: "Design a romantic date for two people in the room", time: 60 },
+                    { text: "Make up sex position names based on animals", time: 45 },
+                    { text: "Create a strip club concept and describe it", time: 60 },
+                    { text: "Write pickup lines for online dating", time: 45 },
+                    { text: "Design adult toys and explain their use", time: 60 }
+                ],
+                extreme: [
+                    { text: "Create and perform a 3-minute one-person show", time: 180 },
+                    { text: "Write and direct a scene with others as actors", time: 240 },
+                    { text: "Create an entire musical album concept with 5 song titles and descriptions", time: 120 },
+                    { text: "Design a theme park with 5 rides based on people in the room", time: 120 },
+                    { text: "Create a religion with commandments and rituals", time: 120 },
+                    { text: "Write and perform a stand-up comedy routine", time: 180 },
+                    { text: "Create a TV show pitch with everyone as characters", time: 120 },
+                    { text: "Design and present a revolutionary invention", time: 120 },
+                    { text: "Create a political party with platform and slogans", time: 120 },
+                    { text: "Organize and host a talk show segment with interviews", time: 180 },
+                    { text: "Create a cult and recruit followers", time: 90 },
+                    { text: "Design a new country with laws and culture", time: 150 },
+                    { text: "Create and perform a one-person Broadway show", time: 240 }
+                ]
+            },
+            group: {
+                emoji: '👥',
+                color: '#DDA0DD',
+                easy: [
+                    { text: "Everyone: High five the person to your left", time: 10 },
+                    { text: "Everyone: Make the same animal sound together", time: 10 },
+                    { text: "Everyone: Stand up and spin once", time: 10 },
+                    { text: "Everyone: Say your favorite food at the same time", time: 10 },
+                    { text: "Everyone: Make a funny face", time: 10 },
+                    { text: "Everyone: Do a group hug", time: 10 },
+                    { text: "Everyone: Clap in rhythm together", time: 20 },
+                    { text: "Everyone: Strike a pose", time: 10 },
+                    { text: "Everyone: Laugh for 10 seconds", time: 10 },
+                    { text: "Everyone: Wave with both hands", time: 10 },
+                    { text: "Everyone: Touch your nose with your tongue (or try)", time: 10 },
+                    { text: "Everyone: Do the wave", time: 15 },
+                    { text: "Everyone: Make a conga line", time: 30 },
+                    { text: "Everyone: Freeze like statues", time: 15 }
+                ],
+                normal: [
+                    { text: "Form a human pyramid", time: 60 },
+                    { text: "Everyone: Share your biggest fear", time: 120 },
+                    { text: "Create a group handshake", time: 90 },
+                    { text: "Everyone: Compliment the person to your right", time: 90 },
+                    { text: "Play telephone with a silly phrase", time: 60 },
+                    { text: "Everyone: Do the wave", time: 20 },
+                    { text: "Create a group statue", time: 45 },
+                    { text: "Everyone: Share an embarrassing story", time: 180 },
+                    { text: "Form letters with your bodies", time: 60 },
+                    { text: "Everyone: Sing a song together", time: 60 },
+                    { text: "Create a group dance", time: 90 },
+                    { text: "Everyone: Share your hidden talent", time: 120 },
+                    { text: "Form a band and make music with body sounds", time: 90 },
+                    { text: "Everyone: Share your biggest pet peeve", time: 90 }
+                ],
+                hard: [
+                    { text: "Everyone: Rank each other on attractiveness (anonymous)", time: 120 },
+                    { text: "Create a group dance routine", time: 180 },
+                    { text: "Everyone: Share your deepest secret", time: 240 },
+                    { text: "Form a band and perform a song", time: 180 },
+                    { text: "Everyone: Roast the person to your left (nicely)", time: 180 },
+                    { text: "Create a human knot and untangle", time: 180 },
+                    { text: "Everyone: Share your most controversial opinion", time: 180 },
+                    { text: "Perform a group talent show", time: 300 },
+                    { text: "Everyone: Confess something you've never told anyone", time: 240 },
+                    { text: "Create and perform a group commercial", time: 180 },
+                    { text: "Everyone: Share your worst habit", time: 120 },
+                    { text: "Create a group story where each person adds one sentence", time: 120 },
+                    { text: "Everyone: Vote on superlatives for each person", time: 180 },
+                    { text: "Perform a group improv scene", time: 150 }
+                ],
+                spicy: [
+                    { text: "Everyone: Share your wildest fantasy", time: 180 },
+                    { text: "Play spin the bottle (with dares)", time: 180 },
+                    { text: "Everyone: Rate your kissing skills 1-10 and why", time: 120 },
+                    { text: "Everyone: Share your body count or take a shot", time: 60 },
+                    { text: "Everyone: Describe your ideal threesome", time: 120 },
+                    { text: "Group vote: Who's most likely to have a one night stand", time: 60 },
+                    { text: "Everyone: Share your biggest turn on", time: 120 },
+                    { text: "Play truth or dare (spicy edition)", time: 300 },
+                    { text: "Everyone: Confess your guilty pleasure", time: 120 },
+                    { text: "Vote: Hottest person in the room", time: 60 },
+                    { text: "Everyone: Share your weirdest kink", time: 120 },
+                    { text: "Group vote: Best and worst dressed", time: 60 },
+                    { text: "Everyone: Share your most embarrassing sex story", time: 180 }
+                ],
+                extreme: [
+                    { text: "Everyone: Do a body shot off someone", time: 120 },
+                    { text: "Group skinny dipping (or underwear)", time: 0 },
+                    { text: "Everyone: Share your worst sexual experience", time: 240 },
+                    { text: "Play strip poker (one round)", time: 300 },
+                    { text: "Everyone: Demonstrate your kissing style on your hand", time: 60 },
+                    { text: "Group massage train", time: 180 },
+                    { text: "Everyone: Share a fantasy about someone in the room", time: 180 },
+                    { text: "Play 7 minutes in heaven (modified)", time: 420 },
+                    { text: "Everyone: Do a sexy dance", time: 120 },
+                    { text: "Group game of extreme truth or dare", time: 600 },
+                    { text: "Everyone: Share your sex bucket list", time: 240 },
+                    { text: "Group vote: Who would you rather scenarios (spicy)", time: 180 },
+                    { text: "Everyone: Act out your favorite position", time: 90 }
+                ]
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupModeSelection();
+            addInitialPlayers();
+        });
+
+        function setupModeSelection() {
+            const modeCards = document.querySelectorAll('.mode-card');
+            modeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    modeCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    gameState.mode = card.dataset.mode;
+                });
+            });
+        }
+
+        function addInitialPlayers() {
+            // Already have 2 players in HTML
+        }
+
+        function addPlayer() {
+            const playersList = document.getElementById('playersList');
+            const playerCount = playersList.children.length;
+            
+            if (playerCount >= 10) {
+                alert('Maximum 10 players allowed!');
+                return;
+            }
+
+            const playerGroup = document.createElement('div');
+            playerGroup.className = 'player-input-group';
+            playerGroup.innerHTML = `
+                <div class="player-number">${playerCount + 1}</div>
+                <input type="text" class="player-input" placeholder="Enter name" maxlength="20">
+                <button class="remove-player-btn" onclick="removePlayer(this)">✕</button>
+            `;
+            
+            playersList.appendChild(playerGroup);
+            playerGroup.querySelector('.player-input').focus();
+        }
+
+        function removePlayer(button) {
+            const playersList = document.getElementById('playersList');
+            if (playersList.children.length <= 2) {
+                alert('Minimum 2 players required!');
+                return;
+            }
+            
+            button.parentElement.remove();
+            updatePlayerNumbers();
+        }
+
+        function updatePlayerNumbers() {
+            const playerGroups = document.querySelectorAll('.player-input-group');
+            playerGroups.forEach((group, index) => {
+                group.querySelector('.player-number').textContent = index + 1;
+            });
+        }
+
+        function startGame() {
+            const playerInputs = document.querySelectorAll('.player-input');
+            const players = [];
+            
+            playerInputs.forEach(input => {
+                const name = input.value.trim();
+                if (name) {
+                    players.push(name);
+                }
+            });
+            
+            if (players.length < 2) {
+                alert('Please enter at least 2 player names!');
+                return;
+            }
+            
+            gameState.players = players;
+            gameState.scores = {};
+            players.forEach(player => {
+                gameState.scores[player] = 0;
+            });
+            
+            // Set target score based on mode
+            if (gameState.mode === 'extreme') {
+                gameState.targetScore = 150;
+            } else if (gameState.mode === 'spicy' || gameState.mode === 'hard') {
+                gameState.targetScore = 120;
+            } else {
+                gameState.targetScore = 100;
+            }
+            
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            
+            updateScoreboard();
+        }
+
+        function updateScoreboard() {
+            const scoreList = document.getElementById('scoreList');
+            const sortedPlayers = [...gameState.players].sort((a, b) => 
+                gameState.scores[b] - gameState.scores[a]
+            );
+            
+            scoreList.innerHTML = sortedPlayers.map((player, index) => {
+                const isCurrent = player === gameState.currentPlayer;
+                return `
+                    <div class="score-item ${isCurrent ? 'current' : ''}">
+                        <span class="score-name">${index + 1}. ${player}</span>
+                        <span class="score-points">${gameState.scores[player]} pts</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function spinWheel() {
+            if (gameState.spinning) return;
+            
+            gameState.spinning = true;
+            gameState.selectingPlayer = true;
+            document.getElementById('spinButton').disabled = true;
+            document.getElementById('challengeCard').style.display = 'none';
+            
+            // Reset player selector
+            const playerSelector = document.getElementById('playerSelector');
+            playerSelector.classList.remove('selected');
+            document.getElementById('selectingText').textContent = 'Selecting player...';
+            document.getElementById('selectedPlayer').textContent = '???';
+            document.getElementById('selectedPlayerScore').textContent = '';
+            
+            // Randomly select a player with animation
+            animatePlayerSelection(() => {
+                // After player is selected, spin for challenge
+                const wheel = document.getElementById('wheel');
+                const spins = Math.floor(Math.random() * 5) + 5;
+                const finalAngle = Math.floor(Math.random() * 360);
+                const totalRotation = spins * 360 + finalAngle;
+                
+                wheel.style.transform = `rotate(${totalRotation}deg)`;
+                
+                playSound(500, 0.1);
+                
+                setTimeout(() => {
+                    const selectedIndex = Math.floor(((360 - (finalAngle % 360)) / 60) % 6);
+                    const categories = Object.keys(challenges);
+                    const selectedCategory = categories[selectedIndex];
+                    
+                    showChallenge(selectedCategory);
+                    gameState.spinning = false;
+                    document.getElementById('spinButton').disabled = false;
+                    
+                    playSound(800, 0.2);
+                }, 4000);
+            });
+        }
+
+        function animatePlayerSelection(callback) {
+            const playerSelector = document.getElementById('playerSelector');
+            let iterations = 0;
+            const maxIterations = 20;
+            const animationSpeed = 100;
+            
+            const interval = setInterval(() => {
+                const randomPlayer = gameState.players[Math.floor(Math.random() * gameState.players.length)];
+                document.getElementById('selectedPlayer').textContent = randomPlayer;
+                playSound(600 + (iterations * 20), 0.05);
+                
+                iterations++;
+                
+                if (iterations >= maxIterations) {
+                    clearInterval(interval);
+                    
+                    // Final selection
+                    gameState.currentPlayer = gameState.players[Math.floor(Math.random() * gameState.players.length)];
+                    document.getElementById('selectedPlayer').textContent = gameState.currentPlayer;
+                    document.getElementById('selectingText').textContent = 'Selected:';
+                    document.getElementById('selectedPlayerScore').textContent = `Score: ${gameState.scores[gameState.currentPlayer]} pts`;
+                    playerSelector.classList.add('selected');
+                    
+                    playSound(1200, 0.3);
+                    
+                    setTimeout(callback, 500);
+                }
+            }, animationSpeed);
+        }
+
+        function showChallenge(category) {
+            gameState.currentCategory = category;
+            const categoryData = challenges[category];
+            let difficulty;
+            
+            // Select difficulty based on mode
+            if (gameState.mode === 'mixed') {
+                const difficulties = ['easy', 'normal', 'hard', 'spicy', 'extreme'];
+                difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+            } else {
+                difficulty = gameState.mode === 'normal' ? 'normal' : gameState.mode;
+            }
+            
+            gameState.currentDifficulty = difficulty;
+            
+            // Get challenges for this difficulty
+            const challengeList = categoryData[difficulty] || categoryData.normal || categoryData.easy;
+            const challenge = getRandomChallenge(challengeList);
+            
+            displayChallenge(categoryData, difficulty, challenge);
+        }
+
+        function getRandomChallenge(challengeList) {
+            // Get a random challenge that hasn't been used recently
+            let challenge;
+            let attempts = 0;
+            
+            do {
+                challenge = challengeList[Math.floor(Math.random() * challengeList.length)];
+                attempts++;
+            } while (gameState.usedChallenges.has(challenge.text) && attempts < 10);
+            
+            gameState.usedChallenges.add(challenge.text);
+            
+            // Clear used challenges if it gets too full
+            if (gameState.usedChallenges.size > 50) {
+                gameState.usedChallenges.clear();
+            }
+            
+            return challenge;
+        }
+
+        function displayChallenge(categoryData, difficulty, challenge) {
+            // Show challenge card
+            const card = document.getElementById('challengeCard');
+            const header = document.getElementById('challengeHeader');
+            const type = document.getElementById('challengeType');
+            const difficultyBadge = document.getElementById('challengeDifficulty');
+            const challengeFor = document.getElementById('challengeFor');
+            const text = document.getElementById('challengeText');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const actionButtons = document.getElementById('actionButtons');
+            
+            // Set colors and content
+            header.style.setProperty('--challenge-color', categoryData.color);
+            header.style.background = categoryData.color;
+            type.textContent = `${categoryData.emoji} ${gameState.currentCategory.toUpperCase()}`;
+            difficultyBadge.textContent = difficulty.toUpperCase();
+            challengeFor.textContent = `${gameState.currentPlayer}'s Challenge`;
+            
+            text.innerHTML = challenge.text;
+            
+            // Show card
+            card.style.display = 'block';
+            
+            // Setup timer if needed
+            if (challenge.time > 0) {
+                startTimer(challenge.time);
+            } else {
+                timerDisplay.style.display = 'none';
+            }
+            
+            // Setup action buttons
+            setupActionButtons(difficulty);
+        }
+
+        function changeChallenge() {
+            // Get a new challenge from the same category and difficulty
+            const categoryData = challenges[gameState.currentCategory];
+            const challengeList = categoryData[gameState.currentDifficulty] || categoryData.normal || categoryData.easy;
+            const newChallenge = getRandomChallenge(challengeList);
+            
+            // Clear current timer
+            clearInterval(gameState.timer);
+            
+            // Animate the change
+            const challengeText = document.getElementById('challengeText');
+            challengeText.style.opacity = '0';
+            
+            setTimeout(() => {
+                challengeText.innerHTML = newChallenge.text;
+                challengeText.style.opacity = '1';
+                
+                // Restart timer if needed
+                if (newChallenge.time > 0) {
+                    startTimer(newChallenge.time);
+                } else {
+                    document.getElementById('timerDisplay').style.display = 'none';
+                }
+            }, 300);
+            
+            // Play sound effect
+            playSound(400, 0.1);
+            setTimeout(() => playSound(600, 0.1), 100);
+            
+            // Add floating text effect
+            createFloatingText('🔄 Changed!', event.target);
+        }
+
+        function createFloatingText(text, element) {
+            const floatingText = document.createElement('div');
+            floatingText.className = 'floating-text';
+            floatingText.textContent = text;
+            floatingText.style.left = element.offsetLeft + 'px';
+            floatingText.style.top = element.offsetTop + 'px';
+            floatingText.style.color = '#FFD700';
+            
+            document.body.appendChild(floatingText);
+            
+            setTimeout(() => {
+                floatingText.remove();
+            }, 2000);
+        }
+
+        function startTimer(seconds) {
+            clearInterval(gameState.timer);
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.style.display = 'block';
+            timerDisplay.classList.remove('warning');
+            
+            let timeLeft = seconds;
+            timerDisplay.textContent = timeLeft;
+            
+            gameState.timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 5) {
+                    timerDisplay.classList.add('warning');
+                    playSound(1000, 0.1);
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    timerDisplay.textContent = "TIME'S UP!";
+                    playSound(200, 0.5);
+                }
+            }, 1000);
+        }
+
+        function setupActionButtons(difficulty) {
+            const actionButtons = document.getElementById('actionButtons');
+            
+            // Calculate points based on difficulty
+            const points = {
+                easy: 5,
+                normal: 10,
+                hard: 15,
+                spicy: 20,
+                extreme: 25
+            };
+            
+            const successPoints = points[difficulty] || 10;
+            const failPoints = Math.floor(successPoints / 2);
+            
+            actionButtons.innerHTML = `
+                <button class="action-btn success" onclick="completeChallenge(${successPoints})">
+                    ✅ Complete (+${successPoints})
+                </button>
+                <button class="action-btn fail" onclick="failChallenge(-${failPoints})">
+                    ❌ Fail (-${failPoints})
+                </button>
+                <button class="action-btn skip" onclick="skipChallenge()">
+                    ⏭️ Skip (0)
+                </button>
+            `;
+        }
+
+        function completeChallenge(points) {
+            clearInterval(gameState.timer);
+            gameState.scores[gameState.currentPlayer] += points;
+            
+            // Success effects
+            playSound(1200, 0.2);
+            setTimeout(() => playSound(1600, 0.2), 100);
+            
+            // Add floating points
+            const button = event.target;
+            createFloatingText(`+${points}`, button);
+            
+            checkWinner();
+            endTurn();
+        }
+
+        function failChallenge(points) {
+            clearInterval(gameState.timer);
+            gameState.scores[gameState.currentPlayer] = Math.max(0, gameState.scores[gameState.currentPlayer] + points);
+            
+            // Fail sound
+            playSound(200, 0.3);
+            
+            // Add floating points
+            const button = event.target;
+            createFloatingText(`${points}`, button);
+            
+            endTurn();
+        }
+
+        function skipChallenge() {
+            clearInterval(gameState.timer);
+            playSound(600, 0.1);
+            
+            const button = event.target;
+            createFloatingText('Skipped', button);
+            
+            endTurn();
+        }
+
+        function endTurn() {
+            // Hide challenge card
+            document.getElementById('challengeCard').style.display = 'none';
+            
+            // Reset player selector
+            const playerSelector = document.getElementById('playerSelector');
+            playerSelector.classList.remove('selected');
+            document.getElementById('selectingText').textContent = 'Spin to select a player!';
+            document.getElementById('selectedPlayer').textContent = '???';
+            document.getElementById('selectedPlayerScore').textContent = '';
+            
+            // Reset current player
+            gameState.currentPlayer = null;
+            
+            // Update scoreboard
+            updateScoreboard();
+        }
+
+        function checkWinner() {
+            if (gameState.scores[gameState.currentPlayer] >= gameState.targetScore) {
+                showWinner();
+            }
+        }
+
+        function showWinner() {
+            clearInterval(gameState.timer);
+            
+            // Find winner
+            const sortedPlayers = [...gameState.players].sort((a, b) => 
+                gameState.scores[b] - gameState.scores[a]
+            );
+            
+            const winner = sortedPlayers[0];
+            
+            // Hide game screen, show winner screen
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winnerScreen').style.display = 'block';
+            
+            document.getElementById('winnerName').textContent = `${winner} Wins!`;
+            document.getElementById('winnerScore').textContent = `Final Score: ${gameState.scores[winner]} points`;
+            
+            // Show final scores
+            const finalScores = document.getElementById('finalScores');
+            finalScores.innerHTML = '<h3>Final Standings:</h3>' + 
+                sortedPlayers.map((player, index) => `
+                    <div style="padding: 8px; ${index === 0 ? 'font-weight: bold; color: #FFD700;' : ''}">
+                        ${index + 1}. ${player}: ${gameState.scores[player]} points
+                    </div>
+                `).join('');
+            
+            // Victory sound
+            playSound(523, 0.2);
+            setTimeout(() => playSound(659, 0.2), 200);
+            setTimeout(() => playSound(784, 0.2), 400);
+            setTimeout(() => playSound(1047, 0.4), 600);
+        }
+
+        function playSound(frequency, duration) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                // Audio not supported
+            }
+        }
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Prevent scrolling when not needed
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('.content')) return;
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+    </html>

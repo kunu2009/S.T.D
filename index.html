@@ -2,1255 +2,766 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Spin the Bottle - Party Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Ultimate Party Games Collection</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             color: white;
             overflow-x: hidden;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
+            padding: 20px 15px;
+        }
+
+        .header {
             text-align: center;
-            min-height: 100vh;
+            margin-bottom: 40px;
         }
 
-        h1 {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            margin-bottom: clamp(15px, 4vw, 30px);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            padding: 10px;
-        }
-
-        .setup-screen {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: clamp(15px, 4vw, 30px);
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .setup-screen h2 {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            margin-bottom: 20px;
-        }
-
-        .player-input {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        input {
-            padding: clamp(10px, 3vw, 12px);
-            border: none;
-            border-radius: 25px;
-            font-size: clamp(14px, 3.5vw, 16px);
-            text-align: center;
-            outline: none;
-            background: rgba(255,255,255,0.9);
-            color: #333;
-            min-width: 200px;
-            flex: 1;
-            max-width: 300px;
-        }
-
-        button {
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            border: none;
-            padding: clamp(10px, 3vw, 12px) clamp(20px, 5vw, 25px);
-            border-radius: 25px;
-            color: white;
-            font-size: clamp(14px, 3.5vw, 16px);
+        .main-title {
+            font-size: clamp(2rem, 6vw, 3.5rem);
             font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 5px;
-            min-height: 44px; /* iOS minimum touch target */
-            min-width: 44px;
-            touch-action: manipulation;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        @keyframes shimmer {
+            0%, 100% { background-position: -200% center; }
+            50% { background-position: 200% center; }
         }
 
-        button:active {
-            transform: translateY(0);
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            opacity: 0.9;
+            margin-bottom: 20px;
         }
 
-        .players-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin: 20px 0;
-            padding: 0 10px;
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
-        .player-tag {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 12px;
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            font-weight: bold;
-            position: relative;
-            font-size: clamp(12px, 3vw, 14px);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .remove-player {
-            background: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 14px;
+            padding: 25px;
+            color: #333;
             cursor: pointer;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .game-area {
-            display: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             position: relative;
-            padding: 10px;
-        }
-
-        .players-circle {
-            position: relative;
-            width: min(90vw, 400px);
-            height: min(90vw, 400px);
-            margin: 0 auto clamp(20px, 5vw, 30px);
-            border: 3px dashed rgba(255,255,255,0.3);
-            border-radius: 50%;
-        }
-
-        .player-position {
-            position: absolute;
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            color: white;
-            padding: clamp(6px, 2vw, 10px) clamp(8px, 3vw, 15px);
-            border-radius: 15px;
-            font-weight: bold;
-            transform: translate(-50%, -50%);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            font-size: clamp(10px, 2.5vw, 14px);
-            white-space: nowrap;
-            max-width: 80px;
             overflow: hidden;
-            text-overflow: ellipsis;
+            border: 3px solid transparent;
         }
 
-        .player-position.selected {
-            background: linear-gradient(45deg, #ff9a9e, #fecfef);
-            border-color: #fff;
-            transform: translate(-50%, -50%) scale(1.1);
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
-            z-index: 10;
-        }
-
-        .bottle-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: clamp(80px, 20vw, 120px);
-            height: clamp(80px, 20vw, 120px);
-        }
-
-        .bottle {
-            width: clamp(40px, 10vw, 60px);
-            height: clamp(70px, 15vw, 100px);
-            position: relative;
-            margin: 10px auto;
-            transition: transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            cursor: pointer;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
-
-        /* Bottle Body */
-        .bottle::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(28px, 7vw, 40px);
-            height: clamp(50px, 12vw, 70px);
-            background: linear-gradient(135deg, #2d5016 0%, #3e6b1e 20%, #4a7c23 40%, #5a9129 60%, #6ba530 80%, #7bb936 100%);
-            border-radius: 6px 6px 12px 12px;
-            box-shadow: 
-                inset -2px 0 4px rgba(0,0,0,0.2),
-                inset 2px 0 4px rgba(255,255,255,0.1),
-                0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        /* Bottle Neck */
-        .bottle::after {
+        .game-card::before {
             content: '';
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(12px, 3vw, 16px);
-            height: clamp(25px, 6vw, 35px);
-            background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #5a9129 100%);
-            border-radius: 6px 6px 3px 3px;
-            box-shadow: 
-                inset -1px 0 3px rgba(0,0,0,0.3),
-                inset 1px 0 3px rgba(255,255,255,0.1);
-        }
-
-        /* Bottle Label */
-        .bottle-label {
-            position: absolute;
-            top: clamp(32px, 8vw, 45px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(22px, 5.5vw, 32px);
-            height: clamp(14px, 3.5vw, 20px);
-            background: linear-gradient(45deg, #f4f4f4, #ffffff);
-            border-radius: 2px;
-            opacity: 0.9;
-            border: 1px solid rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(5px, 1.5vw, 8px);
-            color: #333;
-            font-weight: bold;
-        }
-
-        .bottle-label::before {
-            content: '🍾';
-            font-size: clamp(4px, 1vw, 6px);
-        }
-
-        .spinning {
-            animation: spin 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(var(--rotation)); }
-        }
-
-        .game-controls {
-            margin: clamp(15px, 4vw, 20px) 0;
-        }
-
-        .mode-selection {
-            display: none;
-            margin: clamp(15px, 4vw, 20px) 0;
-            padding: 0 10px;
-        }
-
-        .mode-selection h3 {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            margin-bottom: 15px;
-        }
-
-        .mode-buttons {
-            display: flex;
-            gap: clamp(10px, 3vw, 15px);
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .mode-button {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            font-size: clamp(16px, 4vw, 18px);
-            padding: clamp(12px, 3vw, 15px) clamp(25px, 6vw, 30px);
-            flex: 1;
-            min-width: 120px;
-            max-width: 200px;
-        }
-
-        .content-card {
-            display: none;
-            background: rgba(255,255,255,0.95);
-            color: #333;
-            border-radius: 15px;
-            padding: clamp(20px, 5vw, 30px);
-            margin: clamp(15px, 4vw, 20px) 10px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: slideUp 0.5s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .content-card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            line-height: 1.3;
-        }
-
-        .content-card p {
-            font-size: clamp(1rem, 3.5vw, 1.1rem);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .situation-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .situation-option {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            padding: clamp(12px, 3vw, 15px);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: clamp(14px, 3vw, 16px);
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            text-align: left;
-        }
-
-        .situation-option:hover {
-            background: #e9ecef;
-            border-color: #667eea;
-        }
-
-        .timer {
-            display: none;
-            font-size: clamp(1.5rem, 5vw, 2rem);
-            font-weight: bold;
-            color: #ff6b6b;
-            margin: 15px 0;
-        }
-
-        .custom-content {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: clamp(15px, 4vw, 20px);
-            margin: 20px 0;
-            backdrop-filter: blur(10px);
-        }
-
-        .custom-content h3 {
-            font-size: clamp(1.1rem, 4vw, 1.3rem);
-            margin-bottom: 15px;
-        }
-
-        .custom-input {
+            left: -100%;
             width: 100%;
-            margin: 10px 0;
-            padding: clamp(12px, 3vw, 15px);
-            border-radius: 10px;
-            font-size: clamp(14px, 3vw, 16px);
-            border: none;
-            outline: none;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s;
         }
 
-        textarea.custom-input {
-            min-height: clamp(80px, 20vw, 100px);
-            resize: vertical;
-            font-family: inherit;
+        .game-card:hover::before {
+            left: 100%;
         }
 
-        .tabs {
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: var(--card-color, #667eea);
+        }
+
+        .game-card:active {
+            transform: translateY(-5px) scale(1.01);
+        }
+
+        .game-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-align: center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .game-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            color: var(--card-color, #667eea);
+        }
+
+        .game-description {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #666;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .game-features {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
 
-        .tab {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            padding: clamp(8px, 2vw, 10px) clamp(15px, 4vw, 20px);
+        .feature-tag {
+            background: linear-gradient(135deg, var(--card-color, #667eea), var(--card-color-dark, #5a67d8));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 16px;
             border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        .status-ready {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: clamp(12px, 3vw, 14px);
-            min-height: 40px;
         }
 
-        .tab.active {
-            background: rgba(255,255,255,0.4);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .card-buttons {
-            display: flex;
-            gap: clamp(8px, 2vw, 10px);
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .card-buttons button {
-            flex: 1;
-            min-width: 100px;
-            max-width: 150px;
-            font-size: clamp(13px, 3vw, 16px);
-        }
-
-        .get-another-btn {
-            background: linear-gradient(45deg, #9b59b6, #8e44ad);
-        }
-
-        .spicy-indicator {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        .status-coming-soon {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
             color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: clamp(10px, 2.5vw, 12px);
-            margin-left: 8px;
-            display: inline-block;
         }
 
-        /* Mobile-specific improvements */
+        /* Individual card colors */
+        .card-truth-dare {
+            --card-color: #e74c3c;
+            --card-color-dark: #c0392b;
+        }
+
+        .card-challenge {
+            --card-color: #9b59b6;
+            --card-color-dark: #8e44ad;
+        }
+
+        .card-would-rather {
+            --card-color: #3498db;
+            --card-color-dark: #2980b9;
+        }
+
+        .card-never-have {
+            --card-color: #e67e22;
+            --card-color-dark: #d35400;
+        }
+
+        .card-most-likely {
+            --card-color: #1abc9c;
+            --card-color-dark: #16a085;
+        }
+
+        .card-two-truths {
+            --card-color: #f39c12;
+            --card-color-dark: #e67e22;
+        }
+
+        .card-this-that {
+            --card-color: #27ae60;
+            --card-color-dark: #229954;
+        }
+
+        .card-category {
+            --card-color: #8e44ad;
+            --card-color-dark: #7d3c98;
+        }
+
+        .card-word-chain {
+            --card-color: #e91e63;
+            --card-color-dark: #c2185b;
+        }
+
+        .card-memory {
+            --card-color: #ff5722;
+            --card-color-dark: #e64a19;
+        }
+
+        .card-emoji {
+            --card-color: #795548;
+            --card-color-dark: #6d4c41;
+        }
+
+        .card-song {
+            --card-color: #607d8b;
+            --card-color-dark: #546e7a;
+        }
+
+        .card-questions {
+            --card-color: #009688;
+            --card-color-dark: #00796b;
+        }
+
+        .card-fingers {
+            --card-color: #ff9800;
+            --card-color-dark: #f57c00;
+        }
+
+        .card-trivia {
+            --card-color: #673ab7;
+            --card-color-dark: #5e35b1;
+        }
+
+        .card-spin-bottle {
+            --card-color: #4caf50;
+            --card-color-dark: #43a047;
+        }
+
+        .card-bomb {
+            --card-color: #f44336;
+            --card-color-dark: #e53935;
+        }
+
+        .card-hunt {
+            --card-color: #ff6f61;
+            --card-color-dark: #ff5722;
+        }
+
+        .card-mimic {
+            --card-color: #ab47bc;
+            --card-color-dark: #9c27b0;
+        }
+
+        .section-title {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: bold;
+            text-align: center;
+            margin: 40px 0 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px 0;
+            opacity: 0.8;
+        }
+
+        .footer-text {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .footer-emoji {
+            font-size: 1.5rem;
+        }
+
         @media (max-width: 480px) {
-            .container {
-                padding: 5px;
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
-
-            .player-input {
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
+            
+            .game-card {
+                padding: 15px;
+                font-size: 0.9rem;
             }
-
-            input {
-                width: 100%;
-                max-width: none;
-                min-width: auto;
-            }
-
-            .mode-buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .mode-button {
-                max-width: none;
-                width: 100%;
-            }
-
-            .card-buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .card-buttons button {
-                max-width: none;
-                width: 100%;
-                margin: 3px 0;
-            }
-
-            .players-list {
-                gap: 5px;
-            }
-
-            .player-tag {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-
-            .tabs {
-                gap: 5px;
-            }
-
-            .tab {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .players-circle {
-                width: 85vw;
-                height: 85vw;
-            }
-
-            .player-position {
-                font-size: 10px;
-                padding: 4px 8px;
-                max-width: 60px;
-            }
-        }
-
-        /* Landscape phone optimization */
-        @media (max-height: 500px) and (orientation: landscape) {
-            h1 {
-                font-size: 1.5rem;
+            
+            .game-icon {
+                font-size: 2.5rem;
                 margin-bottom: 10px;
             }
-
-            .players-circle {
-                width: 60vh;
-                height: 60vh;
+            
+            .game-title {
+                font-size: 1.1rem;
+                margin-bottom: 8px;
             }
-
-            .setup-screen {
-                padding: 15px;
+            
+            .game-description {
+                font-size: 0.85rem;
+                margin-bottom: 12px;
             }
-
-            .custom-content {
-                padding: 10px;
+            
+            .feature-tag {
+                font-size: 0.7rem;
+                padding: 3px 8px;
             }
-
-            .content-card {
-                padding: 15px;
-                margin: 10px;
+            
+            .game-status {
+                font-size: 0.75rem;
+                padding: 6px 12px;
             }
-        }
-
-        /* Tablet improvements */
-        @media (min-width: 481px) and (max-width: 768px) {
-            .players-circle {
-                width: 70vw;
-                height: 70vw;
-                max-width: 500px;
-                max-height: 500px;
-            }
-
-            .mode-buttons {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .mode-button {
-                flex: 1;
-                min-width: 140px;
-            }
-        }
-
-        /* Touch feedback */
-        button:active, .situation-option:active, .player-tag:active {
-            transform: scale(0.95);
-        }
-
-        /* Prevent zoom on input focus (iOS) */
-        @media screen and (-webkit-min-device-pixel-ratio: 0) {
-            input, textarea {
-                font-size: 16px;
-            }
-        }
-
-        /* Safe area for devices with notches */
-        @supports (padding: max(0px)) {
+            
             .container {
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-                padding-top: max(10px, env(safe-area-inset-top));
-                padding-bottom: max(10px, env(safe-area-inset-bottom));
+                padding: 15px 10px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .games-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideIn 0.6s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
+    <div class="floating-particles" id="particles"></div>
+    
     <div class="container">
-        <h1>🍾 Spin the Bottle 🎉</h1>
-        
-        <!-- Setup Screen -->
-        <div id="setupScreen" class="setup-screen">
-            <h2>Add Players (3-10)</h2>
-            <div class="player-input">
-                <input type="text" id="playerName" placeholder="Enter player name" maxlength="20">
-                <button onclick="addPlayer()">Add Player</button>
+        <div class="header">
+            <h1 class="main-title">🎉 Ultimate Party Games 🎉</h1>
+            <p class="subtitle">The perfect collection for unforgettable party moments!</p>
+        </div>
+
+        <!-- Featured Games Section -->
+        <h2 class="section-title">🌟 Featured Games</h2>
+        <div class="games-grid">
+            <div class="game-card card-truth-dare loading" onclick="openGame('std.html')">
+                <div class="game-icon">🎯</div>
+                <h3 class="game-title">Truth or Dare</h3>
+                <p class="game-description">Classic party game with spicy truths and daring challenges. Perfect for breaking the ice!</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-10 Players</span>
+                    <span class="feature-tag">Truth & Dare</span>
+                    <span class="feature-tag">Custom Content</span>
+                </div>
+                <div class="game-status status-ready">✅ Play Now</div>
             </div>
-            
-            <div class="players-list" id="playersList"></div>
-            
-            <button onclick="startGame()" id="startGameBtn" style="display: none;">Start Game</button>
-            
-            <!-- Custom Content Management -->
-            <div class="custom-content">
-                <h3>Manage Custom Content</h3>
-                <div class="tabs">
-                    <button class="tab active" onclick="showTab('truths')">Truths</button>
-                    <button class="tab" onclick="showTab('dares')">Dares</button>
-                    <button class="tab" onclick="showTab('situations')">Situations</button>
+
+            <div class="game-card card-challenge loading" onclick="openGame('challenge.html')">
+                <div class="game-icon">⚡</div>
+                <h3 class="game-title">Ultimate Challenge Roulette</h3>
+                <p class="game-description">Spin the wheel for exciting challenges across multiple categories and difficulty levels!</p>
+                <div class="game-features">
+                    <span class="feature-tag">1-8 Players</span>
+                    <span class="feature-tag">Multiple Levels</span>
+                    <span class="feature-tag">Score System</span>
                 </div>
-                
-                <div id="truthsTab">
-                    <textarea class="custom-input" id="customTruth" placeholder="Enter a custom truth question..."></textarea>
-                    <button onclick="addCustomContent('truths')">Add Truth</button>
+                <div class="game-status status-ready">✅ Play Now</div>
+            </div>
+
+            <div class="game-card card-would-rather loading" onclick="openGame('wouldyourather.html')">
+                <div class="game-icon">🤔</div>
+                <h3 class="game-title">Would You Rather</h3>
+                <p class="game-description">Tough choices and hilarious dilemmas! Choose between two impossible options.</p>
+                <div class="game-features">
+                    <span class="feature-tag">Solo/Group</span>
+                    <span class="feature-tag">Multiple Categories</span>
+                    <span class="feature-tag">Funny Questions</span>
                 </div>
-                
-                <div id="daresTab" class="hidden">
-                    <textarea class="custom-input" id="customDare" placeholder="Enter a custom dare..."></textarea>
-                    <button onclick="addCustomContent('dares')">Add Dare</button>
-                </div>
-                
-                <div id="situationsTab" class="hidden">
-                    <textarea class="custom-input" id="customSituation" placeholder="Enter a situation with options separated by | (e.g., 'What would you do? Option 1|Option 2|Option 3')"></textarea>
-                    <button onclick="addCustomContent('situations')">Add Situation</button>
-                </div>
+                <div class="game-status status-ready">✅ Play Now</div>
             </div>
         </div>
-        
-        <!-- Game Area -->
-        <div id="gameArea" class="game-area">
-            <div class="players-circle" id="playersCircle">
-                <div class="bottle-container">
-                    <div class="bottle" id="bottle" onclick="spinBottle()">
-                        <div class="bottle-label"></div>
-                    </div>
+
+        <!-- Conversation & Choice Games -->
+        <h2 class="section-title">💬 Conversation & Choice Games</h2>
+        <div class="games-grid">
+            <div class="game-card card-never-have loading" onclick="openGame('never-have-ever.html')">
+                <div class="game-icon">🙋</div>
+                <h3 class="game-title">Never Have I Ever</h3>
+                <p class="game-description">Reveal secrets and learn surprising facts about your friends!</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-10 Players</span>
+                    <span class="feature-tag">Reveals Secrets</span>
+                    <span class="feature-tag">Fun Facts</span>
                 </div>
+                <div class="game-status status-ready">✅ Play Now</div>
             </div>
-            
-            <div class="game-controls">
-                <button onclick="spinBottle()" id="spinBtn">Spin the Bottle!</button>
-                <button onclick="backToSetup()">Back to Setup</button>
-            </div>
-            
-            <div class="mode-selection" id="modeSelection">
-                <h3>Choose a mode for <span id="selectedPlayer"></span>:</h3>
-                <div class="mode-buttons">
-                    <button class="mode-button" onclick="selectMode('truth')">Truth</button>
-                    <button class="mode-button" onclick="selectMode('dare')">Dare</button>
-                    <button class="mode-button" onclick="selectMode('situation')">Situation</button>
+
+            <div class="game-card card-most-likely loading" onclick="openGame('most-likely-to.html')">
+                <div class="game-icon">👥</div>
+                <h3 class="game-title">Most Likely To</h3>
+                <p class="game-description">Vote and predict who's most likely to do crazy things!</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-8 Players</span>
+                    <span class="feature-tag">Voting System</span>
+                    <span class="feature-tag">Predictions</span>
                 </div>
+                <div class="game-status status-ready">✅ Play Now</div>
             </div>
-            
-            <div class="content-card" id="contentCard">
-                <h3 id="cardTitle"></h3>
-                <p id="cardContent"></p>
-                <div class="situation-options" id="situationOptions"></div>
-                <div class="timer" id="timer"></div>
-                <div class="card-buttons">
-                    <button class="get-another-btn" onclick="getAnother()" id="getAnotherBtn">Get Another</button>
-                    <button onclick="nextRound()">Next Round</button>
-                    <button onclick="skipRound()">Skip</button>
+
+            <div class="game-card card-two-truths loading" onclick="openGame('two-truths-lie.html')">
+                <div class="game-icon">🎭</div>
+                <h3 class="game-title">Two Truths and a Lie</h3>
+                <p class="game-description">Classic icebreaker game - guess which statement is the lie!</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-8 Players</span>
+                    <span class="feature-tag">Icebreaker</span>
+                    <span class="feature-tag">Guessing</span>
                 </div>
+                <div class="game-status status-ready">✅ Play Now</div>
             </div>
+
+            <div class="game-card card-this-that loading" onclick="openBuiltInGame('this-that')">
+                <div class="game-icon">⚖️</div>
+                <h3 class="game-title">This or That</h3>
+                <p class="game-description">Rapid-fire preference questions - make quick decisions!</p>
+                <div class="game-features">
+                    <span class="feature-tag">Any Players</span>
+                    <span class="feature-tag">Quick Decisions</span>
+                    <span class="feature-tag">Preferences</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+        </div>
+
+        <!-- Mini Action/Challenge Games -->
+        <h2 class="section-title">🎮 Mini Action & Challenge Games</h2>
+        <div class="games-grid">
+            <div class="game-card card-category loading" onclick="openBuiltInGame('category')">
+                <div class="game-icon">📝</div>
+                <h3 class="game-title">Category Game</h3>
+                <p class="game-description">Name items in a category until someone can't think of one!</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-8 Players</span>
+                    <span class="feature-tag">Quick Thinking</span>
+                    <span class="feature-tag">Categories</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-word-chain loading" onclick="openBuiltInGame('word-chain')">
+                <div class="game-icon">🔗</div>
+                <h3 class="game-title">Word Chain</h3>
+                <p class="game-description">Link words together - last letter becomes the first letter!</p>
+                <div class="game-features">
+                    <span class="feature-tag">2-6 Players</span>
+                    <span class="feature-tag">Word Play</span>
+                    <span class="feature-tag">Chain Building</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-memory loading" onclick="openBuiltInGame('memory-chain')">
+                <div class="game-icon">🧠</div>
+                <h3 class="game-title">Memory Chain</h3>
+                <p class="game-description">"I went to the market and bought..." - test your memory skills!</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-8 Players</span>
+                    <span class="feature-tag">Memory Test</span>
+                    <span class="feature-tag">Chain Building</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-emoji loading" onclick="openBuiltInGame('emoji-charades')">
+                <div class="game-icon">😄</div>
+                <h3 class="game-title">Emoji Charades</h3>
+                <p class="game-description">Describe things using only emojis - can others guess?</p>
+                <div class="game-features">
+                    <span class="feature-tag">2-8 Players</span>
+                    <span class="feature-tag">Emoji Fun</span>
+                    <span class="feature-tag">Guessing</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+        </div>
+
+        <!-- Quick Competition Games -->
+        <h2 class="section-title">🏁 Quick Competition Games</h2>
+        <div class="games-grid">
+            <div class="game-card card-song loading" onclick="openBuiltInGame('guess-song')">
+                <div class="game-icon">🎵</div>
+                <h3 class="game-title">Guess the Song</h3>
+                <p class="game-description">Name that tune! Quick music recognition challenge.</p>
+                <div class="game-features">
+                    <span class="feature-tag">2-8 Players</span>
+                    <span class="feature-tag">Music Knowledge</span>
+                    <span class="feature-tag">Speed</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-questions loading" onclick="openBuiltInGame('20-questions')">
+                <div class="game-icon">❓</div>
+                <h3 class="game-title">20 Questions</h3>
+                <p class="game-description">Guess the mystery object with yes/no questions only!</p>
+                <div class="game-features">
+                    <span class="feature-tag">2-6 Players</span>
+                    <span class="feature-tag">Deduction</span>
+                    <span class="feature-tag">Strategy</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-fingers loading" onclick="openBuiltInGame('fast-fingers')">
+                <div class="game-icon">⚡</div>
+                <h3 class="game-title">Fast Fingers</h3>
+                <p class="game-description">Type words starting with a letter before time runs out!</p>
+                <div class="game-features">
+                    <span class="feature-tag">1-8 Players</span>
+                    <span class="feature-tag">Speed Typing</span>
+                    <span class="feature-tag">Time Pressure</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-trivia loading" onclick="openBuiltInGame('trivia')">
+                <div class="game-icon">🧩</div>
+                <h3 class="game-title">Trivia Quiz</h3>
+                <p class="game-description">Test your knowledge across various fun categories!</p>
+                <div class="game-features">
+                    <span class="feature-tag">1-10 Players</span>
+                    <span class="feature-tag">Knowledge</span>
+                    <span class="feature-tag">Categories</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+        </div>
+
+        <!-- Daring & Fun Twist Games -->
+        <h2 class="section-title">🎲 Daring & Fun Twist Games</h2>
+        <div class="games-grid">
+            <div class="game-card card-spin-bottle loading" onclick="openBuiltInGame('spin-bottle-simple')">
+                <div class="game-icon">🍾</div>
+                <h3 class="game-title">Digital Spin the Bottle</h3>
+                <p class="game-description">Classic party game with digital spinner for dares and questions!</p>
+                <div class="game-features">
+                    <span class="feature-tag">4-10 Players</span>
+                    <span class="feature-tag">Digital Spinner</span>
+                    <span class="feature-tag">Dares</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-bomb loading" onclick="openBuiltInGame('pass-bomb')">
+                <div class="game-icon">💣</div>
+                <h3 class="game-title">Pass the Bomb</h3>
+                <p class="game-description">Answer before the timer explodes! Hot potato with questions.</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-8 Players</span>
+                    <span class="feature-tag">Timer Pressure</span>
+                    <span class="feature-tag">Quick Answers</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-hunt loading" onclick="openBuiltInGame('scavenger-hunt')">
+                <div class="game-icon">🔍</div>
+                <h3 class="game-title">Mini Scavenger Hunt</h3>
+                <p class="game-description">First to find nearby items wins! Quick treasure hunt.</p>
+                <div class="game-features">
+                    <span class="feature-tag">2-8 Players</span>
+                    <span class="feature-tag">Finding Items</span>
+                    <span class="feature-tag">Speed</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+
+            <div class="game-card card-mimic loading" onclick="openBuiltInGame('mimic')">
+                <div class="game-icon">🎭</div>
+                <h3 class="game-title">Mimic/Act It Out</h3>
+                <p class="game-description">Act out animals, celebrities, and more! Pure fun acting.</p>
+                <div class="game-features">
+                    <span class="feature-tag">3-8 Players</span>
+                    <span class="feature-tag">Acting</span>
+                    <span class="feature-tag">Creativity</span>
+                </div>
+                <div class="game-status status-coming-soon">🚀 Coming Soon</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text">Made with ❤️ for unforgettable party moments</p>
+            <div class="footer-emoji">🎉🎮🍾🎭🎯</div>
         </div>
     </div>
 
     <script>
-        class SpinTheBottleGame {
-            constructor() {
-                this.players = [];
-                this.currentPlayer = null;
-                this.currentMode = null;
-                this.isSpinning = false;
-                this.initializeGame();
-                this.loadData();
-            }
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
 
-            initializeGame() {
-                // Mild truths
-                this.defaultTruths = [
-                    "What's the most embarrassing thing that happened to you this year?",
-                    "Who was your first crush?",
-                    "What's your biggest secret talent?",
-                    "What's the weirdest dream you've ever had?",
-                    "What's your most used emoji?",
-                    "Who in this group would survive the longest in a zombie apocalypse?",
-                    "What's the most childish thing you still do?",
-                    "What app do you waste the most time on?",
-                    "What's your worst habit?",
-                    "What's the strangest food combination you enjoy?"
-                ];
-
-                // Spicy truths
-                this.spicyTruths = [
-                    "If you could date anyone in this room, who would it be?",
-                    "What's the most scandalous thing you've done in public?",
-                    "Who here would you most want to be stranded on a desert island with?",
-                    "What's your biggest turn-on?",
-                    "Have you ever had a crush on someone much older or younger?",
-                    "What's the most intimate place you've been kissed?",
-                    "Who in this room do you think would be the best kisser?",
-                    "What's your guilty pleasure that you'd never admit in public?",
-                    "If you had to marry someone in this room tomorrow, who would it be?",
-                    "What's the most attractive thing about the person to your left?",
-                    "Have you ever fantasized about someone in this room?",
-                    "What's the longest you've gone without wearing underwear?",
-                    "Who here has the most kissable lips?",
-                    "What's your most embarrassing bedroom story?",
-                    "If you could spend a night with any celebrity, who would it be and what would you do?",
-                    "What's the most risqué photo you have on your phone?",
-                    "Who in this room would you most want to see naked?",
-                    "What's your favorite part of someone else's body?",
-                    "Have you ever sent a dirty text to the wrong person?",
-                    "What's the wildest thing you've done while drunk?"
-                ];
-
-                // Mild dares
-                this.defaultDares = [
-                    "Do your best impression of someone in the room",
-                    "Sing the chorus of your favorite song",
-                    "Do 10 push-ups",
-                    "Do a silly dance for 30 seconds",
-                    "Speak in an accent for the next 3 rounds",
-                    "Do your best superhero pose and hold it for 30 seconds",
-                    "Call someone and sing Happy Birthday to them",
-                    "Do your best animal impression",
-                    "Tell a joke that makes at least one person laugh",
-                    "Do a handstand against the wall for 10 seconds"
-                ];
-
-                // Spicy dares
-                this.spicyDares = [
-                    "Give someone in the room a 10-second massage",
-                    "Kiss the person to your right on the cheek",
-                    "Let someone apply lipstick on you without a mirror",
-                    "Slow dance with the person across from you for 30 seconds",
-                    "Feed someone a snack using only your mouth (no hands)",
-                    "Let the person to your left draw something on your arm",
-                    "Whisper something dirty in someone's ear",
-                    "Do a sexy walk across the room",
-                    "Let someone give you a makeover with their eyes closed",
-                    "Sit on someone's lap for the next two rounds",
-                    "Give your phone to someone and let them send a flirty text",
-                    "Let someone else pick an outfit for you from your closet",
-                    "Kiss someone's hand like you're in a fairy tale",
-                    "Let someone tickle you for 30 seconds",
-                    "Do a strip tease dance (clothes stay on!)",
-                    "Let someone feed you with a blindfold on",
-                    "Give someone a piggyback ride around the room",
-                    "Let the group give you a new hairstyle",
-                    "Do the most seductive pose you can think of",
-                    "Let someone write a word on your back with their finger and guess what it is"
-                ];
-
-                // Mild situations
-                this.defaultSituations = [
-                    "You find a wallet with $100. What do you do?|Keep the money|Return it to owner|Donate to charity|Give it to a friend",
-                    "You're trapped in an elevator with your worst enemy. How do you pass time?|Ignore them completely|Try to make peace|Start an argument|Take a nap",
-                    "You can have dinner with any celebrity. Who do you choose?|A famous actor|A world leader|A musician|A scientist",
-                    "You win the lottery. What's your first purchase?|A house|A car|A vacation|Help family/friends",
-                    "You discover you have a superpower. What would you want it to be?|Flying|Invisibility|Mind reading|Time travel"
-                ];
-
-                // Spicy situations
-                this.spicySituations = [
-                    "You're on a romantic date and they suggest going back to their place. What do you do?|Go for it, life's short|Suggest getting coffee instead|Make an excuse and leave|Ask to take things slow",
-                    "You catch your best friend's partner flirting with you. What do you do?|Tell your friend immediately|Flirt back quietly|Confront the partner|Pretend it didn't happen",
-                    "You're at a party and someone really attractive asks you to dance. What's your move?|Accept immediately|Play hard to get|Ask them to buy you a drink first|Suggest going somewhere quieter",
-                    "You wake up next to someone and can't remember how you got there. What do you do?|Sneak out quietly|Wake them up and ask what happened|Stay and see what happens|Order breakfast for both of you",
-                    "Your ex texts you 'I miss you' at 2 AM. What do you do?|Text back immediately|Leave them on read|Block their number|Reply with a spicy photo",
-                    "You're offered a chance to spend a week on a private island with anyone you want. Who do you choose?|Your biggest crush|Your best friend|A mysterious stranger|Someone from this room",
-                    "Someone offers you $1000 to go on a blind date. What do you do?|Take the money and go|Ask for more details first|Decline politely|Counter-offer for $2000",
-                    "You find out someone in this room has a secret crush on you. What do you do?|Try to figure out who it is|Pretend you don't know|Ask everyone directly|Wait for them to confess",
-                    "You're alone in a room with your celebrity crush. What happens next?|Ask for an autograph|Try to seduce them|Have a deep conversation|Take a selfie together",
-                    "You can read someone's mind for one day. Whose mind do you read?|Your crush|Your boss|Your best friend|Someone in this room"
-                ];
-
-                // Load custom content or use defaults
-                this.customTruths = JSON.parse(localStorage.getItem('customTruths') || '[]');
-                this.customDares = JSON.parse(localStorage.getItem('customDares') || '[]');
-                this.customSituations = JSON.parse(localStorage.getItem('customSituations') || '[]');
-            }
-
-            loadData() {
-                const savedPlayers = localStorage.getItem('spinBottlePlayers');
-                if (savedPlayers) {
-                    this.players = JSON.parse(savedPlayers);
-                    this.updatePlayersDisplay();
-                    if (this.players.length >= 3) {
-                        document.getElementById('startGameBtn').style.display = 'block';
-                    }
-                }
-            }
-
-            saveData() {
-                localStorage.setItem('spinBottlePlayers', JSON.stringify(this.players));
-                localStorage.setItem('customTruths', JSON.stringify(this.customTruths));
-                localStorage.setItem('customDares', JSON.stringify(this.customDares));
-                localStorage.setItem('customSituations', JSON.stringify(this.customSituations));
-            }
-
-            addPlayer() {
-                const input = document.getElementById('playerName');
-                const name = input.value.trim();
-                
-                if (name && this.players.length < 10 && !this.players.includes(name)) {
-                    this.players.push(name);
-                    input.value = '';
-                    this.updatePlayersDisplay();
-                    this.saveData();
-                    
-                    if (this.players.length >= 3) {
-                        document.getElementById('startGameBtn').style.display = 'block';
-                    }
-                    
-                    this.playSound('pop');
-                }
-            }
-
-            removePlayer(name) {
-                this.players = this.players.filter(player => player !== name);
-                this.updatePlayersDisplay();
-                this.saveData();
-                
-                if (this.players.length < 3) {
-                    document.getElementById('startGameBtn').style.display = 'none';
-                }
-            }
-
-            updatePlayersDisplay() {
-                const list = document.getElementById('playersList');
-                list.innerHTML = this.players.map(name => 
-                    `<div class="player-tag">
-                        ${name}
-                        <button class="remove-player" onclick="game.removePlayer('${name}')">×</button>
-                    </div>`
-                ).join('');
-            }
-
-            startGame() {
-                if (this.players.length < 3) return;
-                
-                document.getElementById('setupScreen').style.display = 'none';
-                document.getElementById('gameArea').style.display = 'block';
-                this.setupPlayersCircle();
-            }
-
-            setupPlayersCircle() {
-                const circle = document.getElementById('playersCircle');
-                const existingPlayers = circle.querySelectorAll('.player-position');
-                existingPlayers.forEach(player => player.remove());
-                
-                const circleWidth = circle.offsetWidth;
-                const radius = (circleWidth / 2) - 40; // Adjust for player box size
-                const centerX = circleWidth / 2;
-                const centerY = circleWidth / 2; // Using width since it's a square
-                
-                this.players.forEach((player, index) => {
-                    const angle = (index * (360 / this.players.length)) * (Math.PI / 180);
-                    const x = centerX + radius * Math.cos(angle - Math.PI / 2);
-                    const y = centerY + radius * Math.sin(angle - Math.PI / 2);
-                    
-                    const playerDiv = document.createElement('div');
-                    playerDiv.className = 'player-position';
-                    playerDiv.textContent = player;
-                    playerDiv.style.left = x + 'px';
-                    playerDiv.style.top = y + 'px';
-                    playerDiv.dataset.index = index;
-                    
-                    circle.appendChild(playerDiv);
-                });
-            }
-
-            spinBottle() {
-                if (this.isSpinning) return;
-                
-                this.isSpinning = true;
-                const bottle = document.getElementById('bottle');
-                const spinBtn = document.getElementById('spinBtn');
-                const modeSelection = document.getElementById('modeSelection');
-                const contentCard = document.getElementById('contentCard');
-                
-                spinBtn.disabled = true;
-                modeSelection.style.display = 'none';
-                contentCard.style.display = 'none';
-                
-                // Clear previous selection
-                document.querySelectorAll('.player-position').forEach(p => p.classList.remove('selected'));
-                
-                // Random rotation (multiple full rotations + random angle)
-                const randomRotation = 720 + Math.random() * 1080; // 2-5 full rotations
-                bottle.style.setProperty('--rotation', randomRotation + 'deg');
-                bottle.classList.add('spinning');
-                
-                this.playSound('spin');
-                
-                setTimeout(() => {
-                    // Calculate which player the bottle points to
-                    const normalizedAngle = (randomRotation + 90) % 360; // Adjust for bottle tip
-                    const playerIndex = Math.floor((normalizedAngle / 360) * this.players.length);
-                    const selectedIndex = (this.players.length - playerIndex - 1) % this.players.length; // Reverse direction
-                    
-                    this.currentPlayer = this.players[selectedIndex];
-                    
-                    // Highlight selected player
-                    const playerElements = document.querySelectorAll('.player-position');
-                    playerElements[selectedIndex].classList.add('selected');
-                    
-                    // Show mode selection
-                    document.getElementById('selectedPlayer').textContent = this.currentPlayer;
-                    modeSelection.style.display = 'block';
-                    
-                    bottle.classList.remove('spinning');
-                    spinBtn.disabled = false;
-                    this.isSpinning = false;
-                    
-                    this.playSound('ding');
-                }, 3000);
-            }
-
-            selectMode(mode) {
-                this.currentMode = mode;
-                const modeSelection = document.getElementById('modeSelection');
-                const contentCard = document.getElementById('contentCard');
-                
-                modeSelection.style.display = 'none';
-                contentCard.style.display = 'block';
-                
-                this.showContent(mode);
-                this.playSound('card');
-            }
-
-            showContent(mode) {
-                const cardTitle = document.getElementById('cardTitle');
-                const cardContent = document.getElementById('cardContent');
-                const situationOptions = document.getElementById('situationOptions');
-                const timer = document.getElementById('timer');
-                const getAnotherBtn = document.getElementById('getAnotherBtn');
-                
-                situationOptions.style.display = 'none';
-                timer.style.display = 'none';
-                getAnotherBtn.style.display = 'inline-block';
-                
-                switch(mode) {
-                    case 'truth':
-                        this.showTruth(cardTitle, cardContent);
-                        break;
-                    case 'dare':
-                        this.showDare(cardTitle, cardContent, timer);
-                        break;
-                    case 'situation':
-                        this.showSituation(cardTitle, cardContent, situationOptions);
-                        break;
-                }
-            }
-
-            showTruth(titleElement, contentElement) {
-                // Mix mild and spicy truths
-                const allTruths = [...this.defaultTruths, ...this.spicyTruths, ...this.customTruths];
-                const randomTruth = allTruths[Math.floor(Math.random() * allTruths.length)];
-                const isSpicy = this.spicyTruths.includes(randomTruth);
-                
-                titleElement.innerHTML = `Truth for ${this.currentPlayer}${isSpicy ? '<span class="spicy-indicator">🌶️ SPICY</span>' : ''}`;
-                contentElement.textContent = randomTruth;
-            }
-
-            showDare(titleElement, contentElement, timerElement) {
-                // Mix mild and spicy dares
-                const allDares = [...this.defaultDares, ...this.spicyDares, ...this.customDares];
-                const randomDare = allDares[Math.floor(Math.random() * allDares.length)];
-                const isSpicy = this.spicyDares.includes(randomDare);
-                
-                titleElement.innerHTML = `Dare for ${this.currentPlayer}${isSpicy ? '<span class="spicy-indicator">🌶️ SPICY</span>' : ''}`;
-                contentElement.textContent = randomDare;
-                
-                // Start 60-second timer
-                timerElement.style.display = 'block';
-                this.startTimer(60, timerElement);
-            }
-
-            showSituation(titleElement, contentElement, optionsElement) {
-                // Mix mild and spicy situations
-                const allSituations = [...this.defaultSituations, ...this.spicySituations, ...this.customSituations];
-                const randomSituation = allSituations[Math.floor(Math.random() * allSituations.length)];
-                const [scenario, ...options] = randomSituation.split('|');
-                const isSpicy = this.spicySituations.includes(randomSituation);
-                
-                titleElement.innerHTML = `Situation for ${this.currentPlayer}${isSpicy ? '<span class="spicy-indicator">🌶️ SPICY</span>' : ''}`;
-                contentElement.textContent = scenario;
-                
-                optionsElement.style.display = 'block';
-                optionsElement.innerHTML = options.map((option, index) => 
-                    `<div class="situation-option" onclick="game.selectSituationOption(${index}, '${option}')">${option}</div>`
-                ).join('');
-            }
-
-            getAnother() {
-                if (!this.currentMode) return;
-                
-                // Reset situation options if in situation mode
-                if (this.currentMode === 'situation') {
-                    document.querySelectorAll('.situation-option').forEach(opt => {
-                        opt.style.pointerEvents = 'auto';
-                        opt.style.opacity = '1';
-                    });
-                }
-                
-                this.showContent(this.currentMode);
-                this.playSound('card');
-            }
-
-            selectSituationOption(index, option) {
-                const spicyResponses = [
-                    "Ooh, someone's feeling adventurous tonight! 🔥",
-                    "That's... surprisingly naughty of you! 😏",
-                    "Bold choice! You definitely know what you want! 💋",
-                    "Wow, didn't expect that level of spice from you! 🌶️",
-                    "That's either very brave or very reckless! 😈",
-                    "Someone's been watching too many romantic movies! 💕",
-                    "That's the kind of answer that starts rumors! 😉",
-                    "Interesting... very interesting indeed! 🤔",
-                    "That choice says a lot about your personality! 💫",
-                    "Well, well, well... look who's full of surprises! 🎭"
-                ];
-
-                const regularResponses = [
-                    "Interesting choice! You're quite practical.",
-                    "Bold move! You're definitely a risk-taker.",
-                    "Classic response! You play it safe.",
-                    "Unexpected! You think outside the box.",
-                    "Smart choice! You're a strategic thinker.",
-                    "That's very thoughtful of you!",
-                    "Good call! You're clearly wise.",
-                    "Solid choice! You know what you're doing.",
-                    "That's very mature of you!",
-                    "Nice! You've got good instincts."
-                ];
-                
-                const cardContent = document.getElementById('cardContent');
-                const isSpicySituation = this.spicySituations.some(sit => cardContent.textContent.includes(sit.split('|')[0]));
-                const responses = isSpicySituation ? spicyResponses : regularResponses;
-                
-                cardContent.innerHTML += `<br><br><strong>You chose:</strong> ${option}<br><em>${responses[Math.floor(Math.random() * responses.length)]}</em>`;
-                
-                // Disable other options
-                document.querySelectorAll('.situation-option').forEach(opt => {
-                    opt.style.pointerEvents = 'none';
-                    opt.style.opacity = '0.6';
-                });
-            }
-
-            startTimer(seconds, element) {
-                let timeLeft = seconds;
-                const updateTimer = () => {
-                    element.textContent = `⏰ ${timeLeft}s`;
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        setTimeout(updateTimer, 1000);
-                    } else {
-                        element.textContent = "⏰ Time's up!";
-                        this.playSound('timeup');
-                    }
-                };
-                updateTimer();
-            }
-
-            nextRound() {
-                document.getElementById('modeSelection').style.display = 'none';
-                document.getElementById('contentCard').style.display = 'none';
-                document.querySelectorAll('.player-position').forEach(p => p.classList.remove('selected'));
-                this.currentPlayer = null;
-                this.currentMode = null;
-            }
-
-            skipRound() {
-                this.nextRound();
-            }
-
-            backToSetup() {
-                document.getElementById('gameArea').style.display = 'none';
-                document.getElementById('setupScreen').style.display = 'block';
-                this.nextRound();
-            }
-
-            addCustomContent(type) {
-                const content = document.getElementById(`custom${type.charAt(0).toUpperCase() + type.slice(0, -1)}`).value.trim();
-                if (!content) return;
-                
-                switch(type) {
-                    case 'truths':
-                        this.customTruths.push(content);
-                        break;
-                    case 'dares':
-                        this.customDares.push(content);
-                        break;
-                    case 'situations':
-                        this.customSituations.push(content);
-                        break;
-                }
-                
-                document.getElementById(`custom${type.charAt(0).toUpperCase() + type.slice(0, -1)}`).value = '';
-                this.saveData();
-                this.playSound('success');
-                
-                // Show success message
-                const button = event.target;
-                const originalText = button.textContent;
-                button.textContent = 'Added!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 1000);
-            }
-
-            showTab(tabName) {
-                // Hide all tabs
-                document.querySelectorAll('[id$="Tab"]').forEach(tab => tab.classList.add('hidden'));
-                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-                
-                // Show selected tab
-                document.getElementById(tabName + 'Tab').classList.remove('hidden');
-                event.target.classList.add('active');
-            }
-
-            playSound(type) {
-                // Simple Web Audio API sounds
-                try {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    const sounds = {
-                        pop: { frequency: 800, duration: 0.1 },
-                        spin: { frequency: 200, duration: 0.3 },
-                        ding: { frequency: 1000, duration: 0.2 },
-                        card: { frequency: 600, duration: 0.15 },
-                        success: { frequency: 1200, duration: 0.2 },
-                        timeup: { frequency: 300, duration: 0.5 }
-                    };
-                    
-                    if (sounds[type]) {
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        
-                        oscillator.frequency.value = sounds[type].frequency;
-                        oscillator.type = 'sine';
-                        
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sounds[type].duration);
-                        
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + sounds[type].duration);
-                    }
-                } catch (e) {
-                    // Fallback for browsers that don't support Web Audio API
-                    console.log('Sound effect:', type);
-                }
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
             }
         }
 
-        // Global functions for HTML onclick events
-        let game;
-
-        function addPlayer() {
-            game.addPlayer();
+        // Animate cards on load
+        function animateCards() {
+            const cards = document.querySelectorAll('.loading');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+            });
         }
 
-        function startGame() {
-            game.startGame();
-        }
-
-        function spinBottle() {
-            game.spinBottle();
-        }
-
-        function selectMode(mode) {
-            game.selectMode(mode);
-        }
-
-        function getAnother() {
-            game.getAnother();
-        }
-
-        function nextRound() {
-            game.nextRound();
-        }
-
-        function skipRound() {
-            game.skipRound();
-        }
-
-        function backToSetup() {
-            game.backToSetup();
-        }
-
-        function addCustomContent(type) {
-            game.addCustomContent(type);
-        }
-
-        function showTab(tabName) {
-            game.showTab(tabName);
-        }
-
-        // Initialize game when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            game = new SpinTheBottleGame();
+        // Open existing game files
+        function openGame(gameFile) {
+            // Add a loading effect
+            document.body.style.cursor = 'wait';
             
-            // Allow adding players with Enter key
-            document.getElementById('playerName').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    addPlayer();
-                }
-            });
+            // Open the game file
+            window.location.href = gameFile;
+        }
 
-            // Recalculate player positions on resize
-            window.addEventListener('resize', () => {
-                if (game.players.length > 0 && document.getElementById('gameArea').style.display !== 'none') {
+        // Open built-in games (coming soon)
+        function openBuiltInGame(gameType) {
+            alert('🚀 Coming Soon!\n\nThis game is currently under development and will be available in the next update. Stay tuned for more party fun!');
+        }
+
+        // Add ripple effect to cards
+        function addRippleEffect() {
+            const cards = document.querySelectorAll('.game-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
                     setTimeout(() => {
-                        game.setupPlayersCircle();
-                    }, 100);
-                }
+                        ripple.remove();
+                    }, 600);
+                });
             });
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            animateCards();
+            addRippleEffect();
+            
+            // Add CSS for ripple effect
+            const style = document.createElement('style');
+            style.textContent = `
+                .ripple {
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(103, 126, 234, 0.3);
+                    transform: scale(0);
+                    animation: ripple-animation 0.6s linear;
+                    pointer-events: none;
+                }
+                
+                @keyframes ripple-animation {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         });
 
-        // Register service worker for offline capability
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `
-                    const CACHE_NAME = 'spin-bottle-v3';
-                    const urlsToCache = ['/'];
-                    
-                    self.addEventListener('install', (event) => {
-                        event.waitUntil(
-                            caches.open(CACHE_NAME)
-                                .then((cache) => cache.addAll(urlsToCache))
-                        );
-                    });
-                    
-                    self.addEventListener('fetch', (event) => {
-                        event.respondWith(
-                            caches.match(event.request)
-                                .then((response) => response || fetch(event.request))
-                        );
-                    });
-                `;
-                
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                
-                navigator.serviceWorker.register(swUrl)
-                    .then(() => console.log('SW registered'))
-                    .catch(() => console.log('SW registration failed'));
-            });
-        }
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Add some interactivity to the main title
+        const mainTitle = document.querySelector('.main-title');
+        mainTitle.addEventListener('click', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = 'shimmer 3s ease-in-out infinite';
+            }, 10);
+        });
     </script>
 </body>
 </html>

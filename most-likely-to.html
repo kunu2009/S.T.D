@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Most Likely To - Party Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #764ba2;
+            margin-bottom: 30px;
+            font-size: clamp(2rem, 6vw, 2.5rem);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .setup-phase {
+            display: block;
+        }
+
+        .game-phase, .results-phase {
+            display: none;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: clamp(14px, 4vw, 16px);
+            transition: border-color 0.3s;
+            min-height: 50px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: clamp(14px, 4vw, 16px);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-height: 50px;
+            min-width: 100px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .player-tag {
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .remove-player {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .start-game-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-size: 20px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .question-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .question {
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            color: #333;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            animation: questionPop 0.5s ease;
+            line-height: 1.4;
+        }
+
+        @keyframes questionPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .voting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .vote-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .vote-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #764ba2;
+        }
+
+        .vote-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .vote-count {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .results-container {
+            margin: 20px 0;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInResult 0.5s ease;
+        }
+
+        @keyframes slideInResult {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .winner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 20px;
+            padding: 20px;
+            animation: winnerPulse 1s ease infinite;
+        }
+
+        @keyframes winnerPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .vote-bar {
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            transition: width 1s ease;
+            margin: 5px 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+
+        .question-counter {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .voting-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .vote-card {
+                padding: 12px;
+                min-height: 70px;
+                font-size: 14px;
+            }
+            
+            .question {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .controls button {
+                width: 100%;
+                max-width: none;
+            }
+            
+            .players-list {
+                gap: 5px;
+            }
+            
+            .player-tag {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .voting-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .vote-card {
+                min-height: 60px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎉 Most Likely To 🎉</h1>
+        
+        <!-- Setup Phase -->
+        <div class="setup-phase" id="setupPhase">
+            <div class="input-group">
+                <input type="text" id="playerInput" placeholder="Enter player name..." maxlength="20">
+                <button onclick="addPlayer()">Add Player</button>
+            </div>
+            
+            <div class="players-list" id="playersList"></div>
+            
+            <button class="start-game-btn" onclick="startGame()" id="startBtn" style="display: none;">
+                Start Game 🚀
+            </button>
+        </div>
+        
+        <!-- Game Phase -->
+        <div class="game-phase" id="gamePhase">
+            <div class="question-counter" id="questionCounter"></div>
+            <div class="question-container">
+                <div class="question" id="currentQuestion"></div>
+            </div>
+            
+            <div class="voting-grid" id="votingGrid"></div>
+            
+            <div class="controls">
+                <button onclick="showResults()">Show Results</button>
+                <button onclick="skipQuestion()">Skip Question</button>
+            </div>
+        </div>
+        
+        <!-- Results Phase -->
+        <div class="results-phase" id="resultsPhase">
+            <h2 style="text-align: center; margin-bottom: 20px;">Results</h2>
+            <div class="results-container" id="resultsContainer"></div>
+            
+            <div class="controls">
+                <button onclick="nextQuestion()">Next Question</button>
+                <button onclick="endGame()">End Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let players = [];
+        let currentQuestionIndex = 0;
+        let votes = {};
+        let usedQuestions = [];
+        
+        // Preloaded questions
+        const questions = [
+            "Most likely to become famous",
+            "Most likely to marry their high school sweetheart",
+            "Most likely to become a millionaire",
+            "Most likely to go to jail",
+            "Most likely to become a CEO",
+            "Most likely to write a bestselling book",
+            "Most likely to win a Nobel Prize",
+            "Most likely to become a professional gamer",
+            "Most likely to sleep through an exam",
+            "Most likely to fail a driving test",
+            "Most likely to get married first",
+            "Most likely to get married last",
+            "Most likely to have the most kids",
+            "Most likely to become a teacher",
+            "Most likely to become president",
+            "Most likely to win the lottery and lose it all",
+            "Most likely to survive a zombie apocalypse",
+            "Most likely to die first in a horror movie",
+            "Most likely to become a viral meme",
+            "Most likely to get catfished",
+            "Most likely to eat something off the floor",
+            "Most likely to cry during a movie",
+            "Most likely to laugh at the wrong moment",
+            "Most likely to forget their own birthday",
+            "Most likely to get lost in their own city",
+            "Most likely to drunk text their ex",
+            "Most likely to fall asleep at a party",
+            "Most likely to start a fight",
+            "Most likely to break their phone screen",
+            "Most likely to lose their keys",
+            "Most likely to show up late to their own wedding",
+            "Most likely to become a crazy cat person",
+            "Most likely to join a cult",
+            "Most likely to believe in conspiracy theories",
+            "Most likely to get a weird tattoo",
+            "Most likely to dye their hair a crazy color",
+            "Most likely to quit their job dramatically",
+            "Most likely to move to another country",
+            "Most likely to live with their parents forever",
+            "Most likely to become a influencer",
+            "Most likely to get kicked out of a bar",
+            "Most likely to pass out at a party",
+            "Most likely to steal food from the fridge",
+            "Most likely to forget to wear pants on a video call",
+            "Most likely to send a text to the wrong person",
+            "Most likely to fall in love with a fictional character",
+            "Most likely to binge-watch an entire series in one day",
+            "Most likely to become addicted to a mobile game",
+            "Most likely to spend all their money on food delivery",
+            "Most likely to ghost someone",
+            "Most likely to get ghosted",
+            "Most likely to slide into someone's DMs",
+            "Most likely to stalk their ex on social media",
+            "Most likely to take 100 selfies to get one good photo",
+            "Most likely to become TikTok famous",
+            "Most likely to start a podcast nobody listens to",
+            "Most likely to become a stand-up comedian",
+            "Most likely to join a reality TV show",
+            "Most likely to win a dance competition",
+            "Most likely to lose a dance competition",
+            "Most likely to sing in the shower",
+            "Most likely to know all the gossip",
+            "Most likely to spread rumors",
+            "Most likely to keep a secret",
+            "Most likely to spoil a movie",
+            "Most likely to fall asleep in class",
+            "Most likely to skip class",
+            "Most likely to become teacher's pet",
+            "Most likely to cheat on a test",
+            "Most likely to help others cheat",
+            "Most likely to pull an all-nighter before exams",
+            "Most likely to forget there's an exam",
+            "Most likely to argue with the professor",
+            "Most likely to date a professor",
+            "Most likely to live in the library",
+            "Most likely to never visit the library",
+            "Most likely to join every club",
+            "Most likely to start their own club",
+            "Most likely to become student body president",
+            "Most likely to get kicked out of college",
+            "Most likely to graduate with honors",
+            "Most likely to never graduate",
+            "Most likely to become a professional procrastinator",
+            "Most likely to do assignments last minute",
+            "Most likely to copy homework",
+            "Most likely to let others copy their homework",
+            "Most likely to eat instant noodles for every meal",
+            "Most likely to burn water while cooking",
+            "Most likely to order food at 3 AM",
+            "Most likely to steal food from roommates",
+            "Most likely to never clean their room",
+            "Most likely to be a neat freak",
+            "Most likely to lose their student ID",
+            "Most likely to lock themselves out",
+            "Most likely to set off the fire alarm while cooking",
+            "Most likely to sleep through a fire alarm",
+            "Most likely to throw the best parties",
+            "Most likely to never get invited to parties",
+            "Most likely to be the mom/dad of the group",
+            "Most likely to need parental supervision",
+            "Most likely to give the best advice",
+            "Most likely to give the worst advice",
+            "Most likely to become a therapist for friends",
+            "Most likely to need therapy",
+            "Most likely to make friends with strangers",
+            "Most likely to avoid human contact",
+            "Most likely to talk to themselves",
+            "Most likely to win an argument",
+            "Most likely to argue about everything",
+            "Most likely to avoid confrontation",
+            "Most likely to hold a grudge forever",
+            "Most likely to forgive too easily",
+            "Most likely to double text",
+            "Most likely to leave messages on read",
+            "Most likely to use too many emojis",
+            "Most likely to misunderstand sarcasm",
+            "Most likely to be sarcastic 24/7",
+            "Most likely to tell dad jokes",
+            "Most likely to laugh at their own jokes",
+            "Most likely to not understand jokes",
+            "Most likely to prank others",
+            "Most likely to fall for pranks",
+            "Most likely to believe fake news",
+            "Most likely to spread fake news",
+            "Most likely to become a conspiracy theorist",
+            "Most likely to debunk conspiracy theories",
+            "Most likely to see a ghost",
+            "Most likely to become a ghost hunter",
+            "Most likely to be afraid of the dark",
+            "Most likely to sleep with a stuffed animal"
+        ];
+
+        // Add player on Enter key
+        document.getElementById('playerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+
+        function addPlayer() {
+            const input = document.getElementById('playerInput');
+            const name = input.value.trim();
+            
+            if (name && !players.includes(name)) {
+                players.push(name);
+                updatePlayersList();
+                input.value = '';
+                
+                if (players.length >= 2) {
+                    document.getElementById('startBtn').style.display = 'block';
+                }
+            }
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            updatePlayersList();
+            
+            if (players.length < 2) {
+                document.getElementById('startBtn').style.display = 'none';
+            }
+        }
+
+        function updatePlayersList() {
+            const list = document.getElementById('playersList');
+            list.innerHTML = '';
+            
+            players.forEach((player, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'player-tag';
+                tag.innerHTML = `
+                    <span>${player}</span>
+                    <button class="remove-player" onclick="removePlayer(${index})">×</button>
+                `;
+                list.appendChild(tag);
+            });
+        }
+
+        function startGame() {
+            if (players.length < 2) {
+                alert('Add at least 2 players to start!');
+                return;
+            }
+            
+            document.getElementById('setupPhase').style.display = 'none';
+            document.getElementById('gamePhase').style.display = 'block';
+            
+            // Shuffle questions
+            shuffleArray(questions);
+            nextQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = 0;
+                shuffleArray(questions);
+            }
+            
+            votes = {};
+            players.forEach(player => votes[player] = 0);
+            
+            document.getElementById('currentQuestion').textContent = questions[currentQuestionIndex];
+            document.getElementById('questionCounter').textContent = 
+                `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            
+            createVotingCards();
+            
+            document.getElementById('resultsPhase').style.display = 'none';
+            document.getElementById('gamePhase').style.display = 'block';
+        }
+
+        function createVotingCards() {
+            const grid = document.getElementById('votingGrid');
+            grid.innerHTML = '';
+            
+            players.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'vote-card';
+                card.innerHTML = `
+                    <div style="font-size: 18px; font-weight: bold;">${player}</div>
+                    <div class="vote-count" id="vote-${player}">0</div>
+                `;
+                card.onclick = () => voteFor(player, card);
+                grid.appendChild(card);
+            });
+        }
+
+        function voteFor(player, card) {
+            // Toggle selection
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                votes[player]--;
+            } else {
+                card.classList.add('selected');
+                votes[player]++;
+            }
+            
+            document.getElementById(`vote-${player}`).textContent = votes[player];
+        }
+
+        function showResults() {
+            const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+            
+            if (totalVotes === 0) {
+                alert('No votes yet! Vote for someone first.');
+                return;
+            }
+            
+            document.getElementById('gamePhase').style.display = 'none';
+            document.getElementById('resultsPhase').style.display = 'block';
+            
+            displayResults();
+        }
+
+        function displayResults() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+            
+            // Sort players by votes
+            const sortedPlayers = Object.entries(votes)
+                .sort((a, b) => b[1] - a[1]);
+            
+            const maxVotes = sortedPlayers[0][1];
+            
+            sortedPlayers.forEach(([player, voteCount], index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                if (voteCount === maxVotes && voteCount > 0) {
+                    resultItem.classList.add('winner');
+                }
+                
+                resultItem.innerHTML = `
+                    <span style="font-size: 18px;">${index === 0 && voteCount > 0 ? '👑 ' : ''}${player}</span>
+                    <span style="font-size: 20px; font-weight: bold;">${voteCount} vote${voteCount !== 1 ? 's' : ''}</span>
+                `;
+                
+                container.appendChild(resultItem);
+                
+                // Add vote bar
+                if (maxVotes > 0) {
+                    const barContainer = document.createElement('div');
+                    barContainer.style.width = '100%';
+                    barContainer.style.background = '#f0f0f0';
+                    barContainer.style.borderRadius = '15px';
+                    barContainer.style.overflow = 'hidden';
+                    
+                    const bar = document.createElement('div');
+                    bar.className = 'vote-bar';
+                    bar.style.width = '0%';
+                    
+                    barContainer.appendChild(bar);
+                    container.appendChild(barContainer);
+                    
+                    // Animate bar
+                    setTimeout(() => {
+                        bar.style.width = `${(voteCount / maxVotes) * 100}%`;
+                    }, 100 * index);
+                }
+            });
+        }
+
+        function skipQuestion() {
+            if (confirm('Skip this question?')) {
+                currentQuestionIndex++;
+                nextQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = 0;
+                shuffleArray(questions);
+            }
+            
+            votes = {};
+            players.forEach(player => votes[player] = 0);
+            
+            document.getElementById('currentQuestion').textContent = questions[currentQuestionIndex];
+            document.getElementById('questionCounter').textContent = 
+                `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            
+            createVotingCards();
+            
+            document.getElementById('resultsPhase').style.display = 'none';
+            document.getElementById('gamePhase').style.display = 'block';
+        }
+
+        function endGame() {
+            if (confirm('End the game and return to setup?')) {
+                document.getElementById('gamePhase').style.display = 'none';
+                document.getElementById('resultsPhase').style.display = 'none';
+                document.getElementById('setupPhase').style.display = 'block';
+                currentQuestionIndex = 0;
+                votes = {};
+            }
+        }
+    </script>
+</body>
+</html>

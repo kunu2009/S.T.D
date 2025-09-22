@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Would You Rather - Ultimate Party Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #764ba2;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-btn:active {
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .setup-screen {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .category-selection {
+            margin-bottom: 25px;
+        }
+
+        .category-selection h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: 2px solid #764ba2;
+            background: white;
+            color: #764ba2;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .category-btn:hover {
+            background: #764ba2;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .category-btn.selected {
+            background: #764ba2;
+            color: white;
+        }
+
+        .players-input {
+            margin-bottom: 25px;
+        }
+
+        .players-input h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .player-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .player-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .player-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .add-player-btn, .remove-player-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-player-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .remove-player-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .add-player-btn:hover {
+            background: #45a049;
+        }
+
+        .remove-player-btn:hover {
+            background: #da190b;
+        }
+
+        .start-game-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .start-game-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-screen {
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .current-player {
+            font-size: 1.8em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: 600;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .question {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.3em;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            padding: 20px;
+            border: 3px solid #764ba2;
+            background: white;
+            color: #764ba2;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover {
+            background: #764ba2;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .option-btn.selected {
+            background: #764ba2;
+            color: white;
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .option-number {
+            display: block;
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .option-btn:hover .option-number {
+            color: white;
+        }
+
+        .next-btn, .back-btn {
+            padding: 12px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .next-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .back-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .back-btn:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .emoji {
+            font-size: 2em;
+            margin: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .mode-selection {
+                flex-direction: column;
+            }
+            
+            .mode-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Would You Rather? 🎮</h1>
+        
+        <div id="modeSelection" class="mode-selection">
+            <button class="mode-btn" onclick="selectMode('solo')">
+                🎯 Solo Mode
+            </button>
+            <button class="mode-btn" onclick="selectMode('group')">
+                👥 Group Mode
+            </button>
+        </div>
+
+        <div id="setupScreen" class="setup-screen hidden">
+            <div class="category-selection">
+                <h3>Choose Your Categories:</h3>
+                <div class="categories">
+                    <button class="category-btn" data-category="funny">😂 Funny</button>
+                    <button class="category-btn" data-category="easy">😊 Easy</button>
+                    <button class="category-btn" data-category="hard">💪 Hard</button>
+                    <button class="category-btn" data-category="spicy">🌶️ Spicy</button>
+                    <button class="category-btn" data-category="extreme">🔥 Extreme</button>
+                    <button class="category-btn" data-category="weird">🤪 Weird</button>
+                </div>
+            </div>
+
+            <div id="playersInput" class="players-input hidden">
+                <h3>Add Players:</h3>
+                <div id="playersList">
+                    <div class="player-input-group">
+                        <input type="text" class="player-input" placeholder="Player 1 name">
+                        <button class="remove-player-btn" onclick="removePlayer(this)">✖</button>
+                    </div>
+                    <div class="player-input-group">
+                        <input type="text" class="player-input" placeholder="Player 2 name">
+                        <button class="remove-player-btn" onclick="removePlayer(this)">✖</button>
+                    </div>
+                </div>
+                <button class="add-player-btn" onclick="addPlayer()">+ Add Player</button>
+            </div>
+
+            <button class="start-game-btn" onclick="startGame()">Start Game 🚀</button>
+        </div>
+
+        <div id="gameScreen" class="game-screen hidden">
+            <div id="currentPlayer" class="current-player"></div>
+            <div id="question" class="question"></div>
+            <div class="options">
+                <button class="option-btn" onclick="selectOption(1)">
+                    <span class="option-number">1️⃣</span>
+                    <span id="option1"></span>
+                </button>
+                <button class="option-btn" onclick="selectOption(2)">
+                    <span class="option-number">2️⃣</span>
+                    <span id="option2"></span>
+                </button>
+            </div>
+            <div>
+                <button class="back-btn" onclick="backToMenu()">🔙 Back to Menu</button>
+                <button class="next-btn" onclick="nextQuestion()">Next Question ➡️</button>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="questionCount">1</div>
+                    <div class="stat-label">Question #</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="categoryDisplay">-</div>
+                    <div class="stat-label">Category</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = {
+            funny: [
+                {
+                    question: "Would you rather",
+                    option1: "Have fingers as long as legs",
+                    option2: "Have legs as short as fingers"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Sneeze glitter every time",
+                    option2: "Burp confetti"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a rewind button for life",
+                    option2: "Have a pause button for life"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Talk like Yoda forever",
+                    option2: "Breathe like Darth Vader forever"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have spaghetti for hair",
+                    option2: "Have maple syrup sweat"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Fight 100 duck-sized horses",
+                    option2: "Fight 1 horse-sized duck"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a pet dinosaur",
+                    option2: "Have a pet dragon"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Hiccup every time you laugh",
+                    option2: "Laugh every time you hiccup"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a permanent clown face",
+                    option2: "Have a permanent mime outfit"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Speak only in rhymes",
+                    option2: "Speak only in questions"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have rubber chicken arms",
+                    option2: "Have bouncy ball feet"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Fart rainbows",
+                    option2: "Sneeze soap bubbles"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a horn like a unicorn",
+                    option2: "Have a trunk like an elephant"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Only walk in slow motion",
+                    option2: "Only run everywhere you go"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have googly eyes permanently attached",
+                    option2: "Have a mustache that changes color with mood"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Speak with your mouth full forever",
+                    option2: "Always talk in a baby voice"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have alarm clock sounds for sneezes",
+                    option2: "Have car horn sounds for burps"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Only be able to dance to communicate",
+                    option2: "Only be able to sing everything you say"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have pizza slice hands",
+                    option2: "Have ice cream cone feet"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Grow a new finger every week",
+                    option2: "Shrink by one inch every month"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your laugh sound like a dolphin",
+                    option2: "Have your cry sound like a goat"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Only wear inflatable clothing",
+                    option2: "Only wear clothes made of bubble wrap"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have to announce everything you do",
+                    option2: "Have to narrate everything you see"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Sweat cheese",
+                    option2: "Cry chocolate milk"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a backwards head",
+                    option2: "Have upside-down feet"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Only hop like a bunny",
+                    option2: "Only slither like a snake"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have springs for legs",
+                    option2: "Have wheels for hands"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Speak only in movie quotes",
+                    option2: "Speak only in song lyrics"
+                }
+            ],
+            easy: [
+                {
+                    question: "Would you rather",
+                    option1: "Be able to fly",
+                    option2: "Be invisible"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live in the mountains",
+                    option2: "Live by the beach"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have unlimited money",
+                    option2: "Have unlimited knowledge"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be famous",
+                    option2: "Be the richest person unknown"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Travel to the past",
+                    option2: "Travel to the future"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have super speed",
+                    option2: "Have super strength"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never need to sleep",
+                    option2: "Never need to eat"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Always be 10 minutes late",
+                    option2: "Always be 20 minutes early"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have the ability to read minds",
+                    option2: "Have the ability to predict the future"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live in a treehouse",
+                    option2: "Live in a castle"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have perfect memory",
+                    option2: "Have perfect health"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be the smartest person alive",
+                    option2: "Be the most talented person alive"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have free Wi-Fi everywhere",
+                    option2: "Have free coffee everywhere"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be able to talk to animals",
+                    option2: "Be able to speak every language"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your own private island",
+                    option2: "Have your own private jet"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never have to clean again",
+                    option2: "Never have to cook again"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be able to teleport anywhere",
+                    option2: "Be able to time travel"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have unlimited vacation days",
+                    option2: "Have unlimited sick days"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be a famous actor",
+                    option2: "Be a famous musician"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a personal chef",
+                    option2: "Have a personal assistant"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never have to work again",
+                    option2: "Love your job so much it doesn't feel like work"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have x-ray vision",
+                    option2: "Have laser vision"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be able to breathe underwater",
+                    option2: "Be able to walk through walls"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a photographic memory",
+                    option2: "Have the ability to forget bad memories"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be able to control the weather",
+                    option2: "Be able to control gravity"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your dream house",
+                    option2: "Have your dream car"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be incredibly lucky",
+                    option2: "Be incredibly talented"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have dinner with your hero",
+                    option2: "Have dinner with your favorite celebrity"
+                }
+            ],
+            hard: [
+                {
+                    question: "Would you rather",
+                    option1: "Lose all your memories",
+                    option2: "Lose all your money"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Know when you'll die",
+                    option2: "Know how you'll die"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Give up social media forever",
+                    option2: "Give up TV/movies forever"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never use the internet again",
+                    option2: "Never be able to travel again"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live without music",
+                    option2: "Live without movies"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be unable to lie",
+                    option2: "Be unable to tell the truth"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lose your sense of taste",
+                    option2: "Lose your sense of smell"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Work a job you hate for high pay",
+                    option2: "Work a job you love for minimum wage"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lose all your friends",
+                    option2: "Lose all your family"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be paralyzed from the waist down",
+                    option2: "Be blind for the rest of your life"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Know all your friends' true opinions of you",
+                    option2: "Know every lie you've ever been told"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live in a world without art",
+                    option2: "Live in a world without science"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be homeless for 5 years",
+                    option2: "Be in prison for 2 years"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never be able to speak again",
+                    option2: "Never be able to hear again"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live in constant physical pain",
+                    option2: "Live in constant emotional pain"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Forget everyone you've ever met",
+                    option2: "Have everyone forget you"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be betrayed by your best friend",
+                    option2: "Betray your best friend"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live forever but alone",
+                    option2: "Live a normal life but very loved"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never be able to trust anyone",
+                    option2: "Never have anyone trust you"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lose the ability to read",
+                    option2: "Lose the ability to write"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be famous for something terrible",
+                    option2: "Be forgotten completely"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Watch your loved ones suffer",
+                    option2: "Suffer in their place"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never be able to feel happiness",
+                    option2: "Never be able to feel love"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Know you'll die in a year",
+                    option2: "Die unexpectedly tomorrow"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live in a world without hope",
+                    option2: "Live in a world without love"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be completely alone",
+                    option2: "Be surrounded by people who hate you"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lose all your childhood memories",
+                    option2: "Never be able to make new memories"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be feared by everyone",
+                    option2: "Be pitied by everyone"
+                }
+            ],
+            spicy: [
+                {
+                    question: "Would you rather",
+                    option1: "Kiss your ex",
+                    option2: "Kiss a stranger"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Date someone extremely attractive but boring",
+                    option2: "Date someone average looking but hilarious"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Send a risky text to your crush",
+                    option2: "Confess feelings face to face"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your search history exposed",
+                    option2: "Have your text messages exposed"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Go on a blind date set up by parents",
+                    option2: "Go on a blind date set up by your ex"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Never be able to wear clothes at home",
+                    option2: "Never be able to wear shoes anywhere"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Date someone your friends hate",
+                    option2: "Date someone your family hates"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your most embarrassing moment go viral",
+                    option2: "Have your diary published online"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Sleep with your worst enemy",
+                    option2: "Sleep with your best friend's ex"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a one night stand with a celebrity",
+                    option2: "Have a long relationship with someone ordinary"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Walk in on your parents",
+                    option2: "Have your parents walk in on you"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Date someone 20 years older",
+                    option2: "Date someone 20 years younger"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have terrible body odor",
+                    option2: "Have terrible breath"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Accidentally send a nude to your boss",
+                    option2: "Accidentally send a nude to your mom"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be caught cheating",
+                    option2: "Catch your partner cheating"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have no filter when speaking",
+                    option2: "Never be able to speak your mind"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Date someone who talks dirty constantly",
+                    option2: "Date someone who never talks during intimacy"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your browser history projected at work",
+                    option2: "Have your DMs read aloud at a family dinner"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be known as amazing in bed but terrible personality",
+                    option2: "Be known as terrible in bed but amazing personality"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your fantasies become public knowledge",
+                    option2: "Never be able to fantasize again"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Date someone who's horrible at kissing",
+                    option2: "Date someone who's horrible at conversation"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have an affair with a married person",
+                    option2: "Have your partner have an affair"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be in a relationship with great sex but no love",
+                    option2: "Be in a relationship with great love but no sex"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Date someone who's obsessed with their ex",
+                    option2: "Date someone who hates all their exes"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your partner read your diary",
+                    option2: "Read your partner's diary without permission"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be single forever",
+                    option2: "Marry someone you don't love"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have everyone know your biggest secret",
+                    option2: "Never be able to share secrets with anyone"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be with someone who's always jealous",
+                    option2: "Be with someone who doesn't care at all"
+                }
+            ],
+            extreme: [
+                {
+                    question: "Would you rather",
+                    option1: "Eat a live spider",
+                    option2: "Eat a bowl of crickets"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Swim with sharks",
+                    option2: "Bungee jump without checking equipment"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live in a haunted house for a year",
+                    option2: "Live in complete isolation for 6 months"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Walk on hot coals",
+                    option2: "Walk on broken glass"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be buried alive for 10 minutes",
+                    option2: "Be in a cage with a lion for 5 minutes"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Eat only insects for a month",
+                    option2: "Not eat anything for 2 weeks"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Jump from a plane with a homemade parachute",
+                    option2: "Swim across a river full of piranhas"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lose all your teeth",
+                    option2: "Lose all your hair permanently"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Fight a grizzly bear with your bare hands",
+                    option2: "Fight 10 wolves with a stick"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Drink a gallon of sour milk",
+                    option2: "Eat a sandwich made of toenail clippings"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be stranded in the desert for a week",
+                    option2: "Be stranded in the Arctic for a week"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have surgery without anesthesia",
+                    option2: "Have a root canal without anesthesia"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Fall down a flight of stairs every day",
+                    option2: "Get food poisoning every week"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be stung by 100 bees",
+                    option2: "Be bitten by 50 fire ants"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Swim in a pool of blood",
+                    option2: "Swim in a pool of vomit"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your fingernails slowly removed",
+                    option2: "Have your skin slowly peeled off"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be trapped in a coffin for 24 hours",
+                    option2: "Be trapped in a room with 1000 spiders"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Eat raw meat for every meal",
+                    option2: "Eat rotten food for every meal"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have acid poured on your hand",
+                    option2: "Have your hand crushed by a hammer"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be electrocuted every morning",
+                    option2: "Be punched in the face every evening"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Drink a cup of blood",
+                    option2: "Drink a cup of urine"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have bamboo shoots grow under your fingernails",
+                    option2: "Have needles stuck in your eyes"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be attacked by a swarm of wasps",
+                    option2: "Be attacked by a pack of wild dogs"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Live with constant migraines",
+                    option2: "Live with constant nausea"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be forced to watch your loved ones die",
+                    option2: "Die slowly in front of your loved ones"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your worst fears come true",
+                    option2: "Lose the ability to feel any emotion"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be tortured for information you don't have",
+                    option2: "Torture someone innocent"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lose your sanity",
+                    option2: "Lose your soul"
+                }
+            ],
+            weird: [
+                {
+                    question: "Would you rather",
+                    option1: "Have taste buds in your armpits",
+                    option2: "Have your belly button on your forehead"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Sweat mayonnaise",
+                    option2: "Cry ketchup tears"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have feet for hands",
+                    option2: "Have hands for feet"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Only be able to whisper",
+                    option2: "Only be able to shout"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a tail that wags when happy",
+                    option2: "Have ears that flop when sad"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Smell like cheese forever",
+                    option2: "Smell like fish forever"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your thoughts appear as subtitles",
+                    option2: "Have background music based on your mood"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Only walk backwards",
+                    option2: "Only walk sideways like a crab"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have eyes in the back of your head",
+                    option2: "Have arms coming out of your back"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Sneeze every time you hear music",
+                    option2: "Hiccup every time you laugh"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have teeth for fingernails",
+                    option2: "Have fingernails for teeth"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Speak only in sound effects",
+                    option2: "Only communicate through interpretive dance"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have rubber skin",
+                    option2: "Have glass bones"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Grow mushrooms from your head",
+                    option2: "Grow flowers from your ears"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have detachable limbs",
+                    option2: "Have expandable body parts"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Taste colors",
+                    option2: "See sounds as shapes"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have gills but live on land",
+                    option2: "Have lungs but live underwater"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a zipper for a mouth",
+                    option2: "Have buttons for eyes"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Lay eggs instead of having normal bathroom habits",
+                    option2: "Shed your skin like a snake"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have antennas that pick up radio signals",
+                    option2: "Have a screen for a face"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Be made of jello",
+                    option2: "Be made of metal"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have your shadow act independently",
+                    option2: "Have your reflection do different things"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Communicate only through burps",
+                    option2: "Communicate only through farts"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have suction cup fingers",
+                    option2: "Have magnetic hands"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Sleep hanging upside down like a bat",
+                    option2: "Sleep standing up like a horse"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have tentacles for arms",
+                    option2: "Have wheels for legs"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Breathe through your skin",
+                    option2: "See through your fingertips"
+                },
+                {
+                    question: "Would you rather",
+                    option1: "Have a built-in flashlight in your forehead",
+                    option2: "Have a built-in compass in your chest"
+                }
+            ]
+        };
+
+        let currentMode = '';
+        let selectedCategories = [];
+        let players = [];
+        let currentPlayerIndex = 0;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let questionCount = 0;
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeSelection').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+            
+            if (mode === 'group') {
+                document.getElementById('playersInput').classList.remove('hidden');
+            } else {
+                document.getElementById('playersInput').classList.add('hidden');
+            }
+        }
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const category = this.dataset.category;
+                const index = selectedCategories.indexOf(category);
+                
+                if (index > -1) {
+                    selectedCategories.splice(index, 1);
+                } else {
+                    selectedCategories.push(category);
+                }
+            });
+        });
+
+        function addPlayer() {
+            const playersList = document.getElementById('playersList');
+            const playerCount = playersList.children.length + 1;
+            
+            const playerGroup = document.createElement('div');
+            playerGroup.className = 'player-input-group';
+            playerGroup.innerHTML = `
+                <input type="text" class="player-input" placeholder="Player ${playerCount} name">
+                <button class="remove-player-btn" onclick="removePlayer(this)">✖</button>
+            `;
+            
+            playersList.appendChild(playerGroup);
+        }
+
+        function removePlayer(btn) {
+            const playersList = document.getElementById('playersList');
+            if (playersList.children.length > 2) {
+                btn.parentElement.remove();
+            } else {
+                alert('You need at least 2 players for group mode!');
+            }
+        }
+
+        function startGame() {
+            if (selectedCategories.length === 0) {
+                alert('Please select at least one category!');
+                return;
+            }
+
+            if (currentMode === 'group') {
+                players = [];
+                const playerInputs = document.querySelectorAll('.player-input');
+                
+                playerInputs.forEach(input => {
+                    if (input.value.trim()) {
+                        players.push(input.value.trim());
+                    }
+                });
+
+                if (players.length < 2) {
+                    alert('Please enter at least 2 player names!');
+                    return;
+                }
+            }
+
+            // Prepare questions from selected categories
+            currentQuestions = [];
+            selectedCategories.forEach(category => {
+                currentQuestions.push(...questions[category]);
+            });
+            
+            // Shuffle questions
+            currentQuestions.sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            questionCount = 0;
+
+            // Start the game
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= currentQuestions.length) {
+                currentQuestionIndex = 0;
+                currentQuestions.sort(() => Math.random() - 0.5);
+            }
+
+            const question = currentQuestions[currentQuestionIndex];
+            questionCount++;
+            
+            // Update player display for group mode
+            if (currentMode === 'group') {
+                const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                document.getElementById('currentPlayer').innerHTML = `🎯 ${randomPlayer}'s Turn!`;
+                document.getElementById('currentPlayer').style.display = 'block';
+            } else {
+                document.getElementById('currentPlayer').style.display = 'none';
+            }
+
+            // Update question display
+            document.getElementById('question').textContent = question.question;
+            document.getElementById('option1').textContent = question.option1;
+            document.getElementById('option2').textContent = question.option2;
+            
+            // Update stats
+            document.getElementById('questionCount').textContent = questionCount;
+            
+            // Find and display category
+            let categoryDisplay = '';
+            for (let category in questions) {
+                if (questions[category].includes(question)) {
+                    categoryDisplay = category.charAt(0).toUpperCase() + category.slice(1);
+                    break;
+                }
+            }
+            document.getElementById('categoryDisplay').textContent = categoryDisplay;
+
+            // Reset selected state
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+
+        function selectOption(option) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.querySelectorAll('.option-btn')[option - 1].classList.add('selected');
+            
+            // Auto advance after selection (optional)
+            setTimeout(() => {
+                // You can add score tracking or statistics here
+            }, 500);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function backToMenu() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('modeSelection').classList.remove('hidden');
+            document.getElementById('setupScreen').classList.add('hidden');
+            
+            // Reset everything
+            selectedCategories = [];
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            players = [];
+            currentQuestionIndex = 0;
+            questionCount = 0;
+        }
+    </script>
+</body>
+</html>
